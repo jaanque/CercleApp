@@ -1179,296 +1179,297 @@ export default function HomeScreen() {
                 <Text style={styles.premiumBenefitText}>Envíos gratis y prioridad de entrega</Text>
               </View>
             </View>
+          </Pressable>
 
-            {/* Lookbook Tabs Selector */}
-            <View style={styles.lookbookTabsContainer}>
-              {LOOKS_DATA.map((look) => {
-                const isSelected = activeLookId === look.id;
-                return (
+          {/* Lookbook Tabs Selector */}
+          <View style={styles.lookbookTabsContainer}>
+            {LOOKS_DATA.map((look) => {
+              const isSelected = activeLookId === look.id;
+              return (
+                <Pressable
+                  key={look.id}
+                  onPress={() => {
+                    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                    setActiveLookId(look.id as 'l1' | 'l2');
+                    setActiveHotspotId(null);
+                  }}
+                  style={({ pressed }) => [
+                    styles.lookbookTabButton,
+                    isSelected && styles.lookbookTabButtonActive,
+                    pressed && { opacity: 0.85 }
+                  ]}
+                >
+                  <Text style={[
+                    styles.lookbookTabText,
+                    isSelected && styles.lookbookTabTextActive
+                  ]}>
+                    {look.emoji} {look.title}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+
+          {/* Lookbook Card Canvas */}
+          {(() => {
+            const currentLook = LOOKS_DATA.find(l => l.id === activeLookId)!;
+
+            // Check if user has ALL items of this look in their cart
+            const hasAllItems = currentLook.items.every(item => (quantities[item.id] || 0) > 0);
+
+            return (
+              <View style={styles.lookbookCanvasCard}>
+                {/* Main Lifestyle Image */}
+                <Image
+                  source={{ uri: currentLook.image }}
+                  style={styles.lookbookImage}
+                  contentFit="cover"
+                />
+
+                {/* Relative Hotspots Layer */}
+                <View style={StyleSheet.absoluteFillObject}>
+                  {currentLook.items.map((item) => {
+                    const isActive = activeHotspotId === item.id;
+
+                    // Animated Pulsing ring styles
+                    const scalePulse = pulsingAnim.interpolate({
+                      inputRange: [0, 1],
+                      outputRange: [1, 2.4],
+                    });
+                    const opacityPulse = pulsingAnim.interpolate({
+                      inputRange: [0, 0.8, 1],
+                      outputRange: [0.6, 0.3, 0],
+                    });
+
+                    return (
+                      <View
+                        key={item.id}
+                        style={[
+                          styles.hotspotContainer,
+                          { top: item.y as any, left: item.x as any }
+                        ]}
+                      >
+                        {/* Glow Pulsing Ring */}
+                        <Animated.View
+                          style={[
+                            styles.hotspotPulse,
+                            {
+                              transform: [{ scale: scalePulse }],
+                              opacity: opacityPulse,
+                            }
+                          ]}
+                        />
+                        {/* Glowing core dot */}
+                        <Pressable
+                          style={({ pressed }) => [
+                            styles.hotspotDot,
+                            isActive && styles.hotspotDotActive,
+                            pressed && { transform: [{ scale: 0.9 }] }
+                          ]}
+                          onPress={() => {
+                            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                            setActiveHotspotId(activeHotspotId === item.id ? null : item.id);
+                          }}
+                        >
+                          <SymbolView
+                            name={isActive ? "multiply" : "plus"}
+                            size={10}
+                            tintColor="#FFFFFF"
+                          />
+                        </Pressable>
+
+                        {/* Glassmorphic Tooltip Card overlay */}
+                        {isActive && (
+                          <View style={styles.tooltipCard}>
+                            <View style={styles.tooltipHeader}>
+                              <Text style={styles.tooltipName} numberOfLines={1}>
+                                {item.name}
+                              </Text>
+                              <Text style={styles.tooltipStore} numberOfLines={1}>
+                                {item.store}
+                              </Text>
+                            </View>
+
+                            <View style={styles.tooltipPricingRow}>
+                              <View style={styles.tooltipPriceGroup}>
+                                <Text style={styles.tooltipPrice}>{item.price}</Text>
+                                <Text style={styles.tooltipOrigPrice}>{item.originalPrice}</Text>
+                              </View>
+
+                              <Pressable
+                                style={({ pressed }) => [
+                                  styles.tooltipAddBtn,
+                                  (quantities[item.id] || 0) > 0 && styles.tooltipAddBtnActive,
+                                  pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] }
+                                ]}
+                                onPress={() => {
+                                  if ((quantities[item.id] || 0) > 0) {
+                                    handleRemove(item.id);
+                                  } else {
+                                    handleAdd(item.id);
+                                  }
+                                }}
+                              >
+                                <Text style={[
+                                  styles.tooltipAddBtnText,
+                                  (quantities[item.id] || 0) > 0 && styles.tooltipAddBtnTextActive
+                                ]}>
+                                  {(quantities[item.id] || 0) > 0 ? `${quantities[item.id]} en bolsa` : 'Añadir +'}
+                                </Text>
+                              </Pressable>
+                            </View>
+                          </View>
+                        )}
+                      </View>
+                    );
+                  })}
+                </View>
+
+                {/* Bottom combo control bar */}
+                <View style={styles.lookbookComboBar}>
+                  <View style={styles.comboInfoColumn}>
+                    <Text style={styles.comboTitle}>Pack {currentLook.title}</Text>
+                    <Text style={styles.comboSavings}>{currentLook.discountText}</Text>
+                  </View>
+                  <View style={styles.comboPriceWrapper}>
+                    <Text style={styles.comboOriginalPrice}>{currentLook.originalPrice}</Text>
+                    <Text style={styles.comboPriceText}>{currentLook.comboPrice}</Text>
+                  </View>
                   <Pressable
-                    key={look.id}
+                    style={({ pressed }) => [
+                      styles.comboAddButton,
+                      hasAllItems && styles.comboAddButtonActive,
+                      pressed && { opacity: 0.88, transform: [{ scale: 0.97 }] }
+                    ]}
                     onPress={() => {
                       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                      setActiveLookId(look.id as 'l1' | 'l2');
-                      setActiveHotspotId(null);
+                      // Add ALL products of the look to cart
+                      const nextQuantities = { ...quantities };
+                      currentLook.items.forEach(item => {
+                        nextQuantities[item.id] = Math.max((nextQuantities[item.id] || 0), 1);
+                      });
+                      setQuantities(nextQuantities);
+                      cartStore.set(nextQuantities);
                     }}
-                    style={({ pressed }) => [
-                      styles.lookbookTabButton,
-                      isSelected && styles.lookbookTabButtonActive,
-                      pressed && { opacity: 0.85 }
-                    ]}
                   >
                     <Text style={[
-                      styles.lookbookTabText,
-                      isSelected && styles.lookbookTabTextActive
+                      styles.comboAddButtonText,
+                      hasAllItems && styles.comboAddButtonTextActive
                     ]}>
-                      {look.emoji} {look.title}
+                      {hasAllItems ? '¡Pack Añadido! 🛍️' : 'Añadir Pack'}
                     </Text>
                   </Pressable>
-                );
-              })}
-            </View>
-
-            {/* Lookbook Card Canvas */}
-            {(() => {
-              const currentLook = LOOKS_DATA.find(l => l.id === activeLookId)!;
-
-              // Check if user has ALL items of this look in their cart
-              const hasAllItems = currentLook.items.every(item => (quantities[item.id] || 0) > 0);
-
-              return (
-                <View style={styles.lookbookCanvasCard}>
-                  {/* Main Lifestyle Image */}
-                  <Image
-                    source={{ uri: currentLook.image }}
-                    style={styles.lookbookImage}
-                    contentFit="cover"
-                  />
-
-                  {/* Relative Hotspots Layer */}
-                  <View style={StyleSheet.absoluteFillObject}>
-                    {currentLook.items.map((item) => {
-                      const isActive = activeHotspotId === item.id;
-
-                      // Animated Pulsing ring styles
-                      const scalePulse = pulsingAnim.interpolate({
-                        inputRange: [0, 1],
-                        outputRange: [1, 2.4],
-                      });
-                      const opacityPulse = pulsingAnim.interpolate({
-                        inputRange: [0, 0.8, 1],
-                        outputRange: [0.6, 0.3, 0],
-                      });
-
-                      return (
-                        <View
-                          key={item.id}
-                          style={[
-                            styles.hotspotContainer,
-                            { top: item.y as any, left: item.x as any }
-                          ]}
-                        >
-                          {/* Glow Pulsing Ring */}
-                          <Animated.View
-                            style={[
-                              styles.hotspotPulse,
-                              {
-                                transform: [{ scale: scalePulse }],
-                                opacity: opacityPulse,
-                              }
-                            ]}
-                          />
-                          {/* Glowing core dot */}
-                          <Pressable
-                            style={({ pressed }) => [
-                              styles.hotspotDot,
-                              isActive && styles.hotspotDotActive,
-                              pressed && { transform: [{ scale: 0.9 }] }
-                            ]}
-                            onPress={() => {
-                              LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                              setActiveHotspotId(activeHotspotId === item.id ? null : item.id);
-                            }}
-                          >
-                            <SymbolView
-                              name={isActive ? "multiply" : "plus"}
-                              size={10}
-                              tintColor="#FFFFFF"
-                            />
-                          </Pressable>
-
-                          {/* Glassmorphic Tooltip Card overlay */}
-                          {isActive && (
-                            <View style={styles.tooltipCard}>
-                              <View style={styles.tooltipHeader}>
-                                <Text style={styles.tooltipName} numberOfLines={1}>
-                                  {item.name}
-                                </Text>
-                                <Text style={styles.tooltipStore} numberOfLines={1}>
-                                  {item.store}
-                                </Text>
-                              </View>
-
-                              <View style={styles.tooltipPricingRow}>
-                                <View style={styles.tooltipPriceGroup}>
-                                  <Text style={styles.tooltipPrice}>{item.price}</Text>
-                                  <Text style={styles.tooltipOrigPrice}>{item.originalPrice}</Text>
-                                </View>
-
-                                <Pressable
-                                  style={({ pressed }) => [
-                                    styles.tooltipAddBtn,
-                                    (quantities[item.id] || 0) > 0 && styles.tooltipAddBtnActive,
-                                    pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] }
-                                  ]}
-                                  onPress={() => {
-                                    if ((quantities[item.id] || 0) > 0) {
-                                      handleRemove(item.id);
-                                    } else {
-                                      handleAdd(item.id);
-                                    }
-                                  }}
-                                >
-                                  <Text style={[
-                                    styles.tooltipAddBtnText,
-                                    (quantities[item.id] || 0) > 0 && styles.tooltipAddBtnTextActive
-                                  ]}>
-                                    {(quantities[item.id] || 0) > 0 ? `${quantities[item.id]} en bolsa` : 'Añadir +'}
-                                  </Text>
-                                </Pressable>
-                              </View>
-                            </View>
-                          )}
-                        </View>
-                      );
-                    })}
-                  </View>
-
-                  {/* Bottom combo control bar */}
-                  <View style={styles.lookbookComboBar}>
-                    <View style={styles.comboInfoColumn}>
-                      <Text style={styles.comboTitle}>Pack {currentLook.title}</Text>
-                      <Text style={styles.comboSavings}>{currentLook.discountText}</Text>
-                    </View>
-                    <View style={styles.comboPriceWrapper}>
-                      <Text style={styles.comboOriginalPrice}>{currentLook.originalPrice}</Text>
-                      <Text style={styles.comboPriceText}>{currentLook.comboPrice}</Text>
-                    </View>
-                    <Pressable
-                      style={({ pressed }) => [
-                        styles.comboAddButton,
-                        hasAllItems && styles.comboAddButtonActive,
-                        pressed && { opacity: 0.88, transform: [{ scale: 0.97 }] }
-                      ]}
-                      onPress={() => {
-                        LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                        // Add ALL products of the look to cart
-                        const nextQuantities = { ...quantities };
-                        currentLook.items.forEach(item => {
-                          nextQuantities[item.id] = Math.max((nextQuantities[item.id] || 0), 1);
-                        });
-                        setQuantities(nextQuantities);
-                        cartStore.set(nextQuantities);
-                      }}
-                    >
-                      <Text style={[
-                        styles.comboAddButtonText,
-                        hasAllItems && styles.comboAddButtonTextActive
-                      ]}>
-                        {hasAllItems ? '¡Pack Añadido! 🛍️' : 'Añadir Pack'}
-                      </Text>
-                    </Pressable>
-                  </View>
                 </View>
-              );
-            })()}
+              </View>
+            );
+          })()}
 
-            {/* 8. Ofertas cerca de ti Section (Stock Muerto de Comercios Locales) */}
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Ofertas cerca de ti</Text>
-              <Pressable
-                style={({ pressed }) => [
-                  styles.seeAllButton,
-                  pressed && { opacity: 0.85 }
-                ]}
-              >
-                <Text style={styles.seeAllText}>Ver más</Text>
-              </Pressable>
-            </View>
+          {/* 8. Ofertas cerca de ti Section (Stock Muerto de Comercios Locales) */}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Ofertas cerca de ti</Text>
+            <Pressable
+              style={({ pressed }) => [
+                styles.seeAllButton,
+                pressed && { opacity: 0.85 }
+              ]}
+            >
+              <Text style={styles.seeAllText}>Ver más</Text>
+            </Pressable>
+          </View>
 
-            <View style={styles.flashSectionWrapper}>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.horizontalSectionContainer}
-              >
-                {FEATURED_PRODUCTS.map((prod) => (
-                  <DealProductCard
-                    key={prod.id}
-                    prod={prod}
-                    qty={quantities[prod.id] ?? 0}
-                    onPress={() => {
-                      setSelectedProduct(prod);
-                      setIsDetailsOpen(true);
-                    }}
-                    onAdd={() => handleAdd(prod.id)}
-                    onRemove={() => handleRemove(prod.id)}
-                    onClear={() => handleClearSelection(prod.id)}
-                  />
-                ))}
-              </ScrollView>
-            </View>
+          <View style={styles.flashSectionWrapper}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalSectionContainer}
+            >
+              {FEATURED_PRODUCTS.map((prod) => (
+                <DealProductCard
+                  key={prod.id}
+                  prod={prod}
+                  qty={quantities[prod.id] ?? 0}
+                  onPress={() => {
+                    setSelectedProduct(prod);
+                    setIsDetailsOpen(true);
+                  }}
+                  onAdd={() => handleAdd(prod.id)}
+                  onRemove={() => handleRemove(prod.id)}
+                  onClear={() => handleClearSelection(prod.id)}
+                />
+              ))}
+            </ScrollView>
+          </View>
 
-            {/* Nueva Sección de Últimas Unidades (Filtrados con stock crítico) */}
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Últimas unidades</Text>
-              <Pressable
-                style={({ pressed }) => [
-                  styles.seeAllButton,
-                  pressed && { opacity: 0.85 }
-                ]}
-              >
-                <Text style={styles.seeAllText}>Ver más</Text>
-              </Pressable>
-            </View>
+          {/* Nueva Sección de Últimas Unidades (Filtrados con stock crítico) */}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Últimas unidades</Text>
+            <Pressable
+              style={({ pressed }) => [
+                styles.seeAllButton,
+                pressed && { opacity: 0.85 }
+              ]}
+            >
+              <Text style={styles.seeAllText}>Ver más</Text>
+            </Pressable>
+          </View>
 
-            <View style={styles.flashSectionWrapper}>
-              <ScrollView
-                horizontal
-                showsHorizontalScrollIndicator={false}
-                contentContainerStyle={styles.horizontalSectionContainer}
-              >
-                {FEATURED_PRODUCTS.filter((prod) => prod.stockRemaining <= 3).map((prod) => (
-                  <DealProductCard
-                    key={prod.id}
-                    prod={prod}
-                    qty={quantities[prod.id] ?? 0}
-                    onPress={() => {
-                      setSelectedProduct(prod);
-                      setIsDetailsOpen(true);
-                    }}
-                    onAdd={() => handleAdd(prod.id)}
-                    onRemove={() => handleRemove(prod.id)}
-                    onClear={() => handleClearSelection(prod.id)}
-                  />
-                ))}
-              </ScrollView>
-            </View>
+          <View style={styles.flashSectionWrapper}>
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              contentContainerStyle={styles.horizontalSectionContainer}
+            >
+              {FEATURED_PRODUCTS.filter((prod) => prod.stockRemaining <= 3).map((prod) => (
+                <DealProductCard
+                  key={prod.id}
+                  prod={prod}
+                  qty={quantities[prod.id] ?? 0}
+                  onPress={() => {
+                    setSelectedProduct(prod);
+                    setIsDetailsOpen(true);
+                  }}
+                  onAdd={() => handleAdd(prod.id)}
+                  onRemove={() => handleRemove(prod.id)}
+                  onClear={() => handleClearSelection(prod.id)}
+                />
+              ))}
+            </ScrollView>
+          </View>
 
-            {/* 9. Nearby Stores Section */}
-            <View style={styles.sectionHeader}>
-              <Text style={styles.sectionTitle}>Cerca de ti</Text>
-              <Pressable
-                style={({ pressed }) => [
-                  styles.seeAllButton,
-                  pressed && { opacity: 0.85 }
-                ]}
-              >
-                <Text style={styles.seeAllText}>Filtros</Text>
-              </Pressable>
-            </View>
+          {/* 9. Nearby Stores Section */}
+          <View style={styles.sectionHeader}>
+            <Text style={styles.sectionTitle}>Cerca de ti</Text>
+            <Pressable
+              style={({ pressed }) => [
+                styles.seeAllButton,
+                pressed && { opacity: 0.85 }
+              ]}
+            >
+              <Text style={styles.seeAllText}>Filtros</Text>
+            </Pressable>
+          </View>
 
-            <View style={styles.storesList}>
-              {filteredStores.length === 0 ? (
-                <View style={styles.emptyStateContainer}>
-                  <View style={styles.emptyStateIconBadge}>
-                    <SymbolView name="storefront.fill" size={24} tintColor="#9CA3AF" />
-                  </View>
-                  <Text style={styles.emptyStateTitle}>No se encontraron locales</Text>
-                  <Text style={styles.emptyStateText}>
-                    Intenta buscar otra palabra clave, marca o explora una categoría diferente.
-                  </Text>
+          <View style={styles.storesList}>
+            {filteredStores.length === 0 ? (
+              <View style={styles.emptyStateContainer}>
+                <View style={styles.emptyStateIconBadge}>
+                  <SymbolView name="storefront.fill" size={24} tintColor="#9CA3AF" />
                 </View>
-              ) : (
-                filteredStores.map((store) => (
-                  <NearbyStoreCard
-                    key={store.id}
-                    store={store}
-                    onPress={() => router.push({ pathname: '/store', params: { id: store.id } })}
-                  />
-                ))
-              )}
-            </View>
+                <Text style={styles.emptyStateTitle}>No se encontraron locales</Text>
+                <Text style={styles.emptyStateText}>
+                  Intenta buscar otra palabra clave, marca o explora una categoría diferente.
+                </Text>
+              </View>
+            ) : (
+              filteredStores.map((store) => (
+                <NearbyStoreCard
+                  key={store.id}
+                  store={store}
+                  onPress={() => router.push({ pathname: '/store', params: { id: store.id } })}
+                />
+              ))
+            )}
+          </View>
 
         </View>
       </ScrollView>
