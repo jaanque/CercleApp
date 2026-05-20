@@ -1,0 +1,77 @@
+Created At: 2026-05-20T16:41:09Z
+Completed At: 2026-05-20T16:41:09Z
+File Path: `file:///Users/jan/Desktop/CercleApp/src/app/%28tabs%29/index.tsx`
+Total Lines: 2654
+Total Bytes: 78220
+Showing lines 1170 to 1340
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+1170:                 <SymbolView name="checkmark.circle.fill" size={12} tintColor="#10B981" />
+1171:                 <Text style={styles.premiumBenefitText}>Sin comisiones en tus pedidos</Text>
+1172:               </View>
+1173:               <View style={styles.premiumBenefitItem}>
+1174:                 <SymbolView name="checkmark.circle.fill" size={12} tintColor="#10B981" />
+1175:                 <Text style={styles.premiumBenefitText}>Acceso exclusivo e ilimitado a Cercle AI</Text>
+1176:               </View>
+1177:               <View style={styles.premiumBenefitItem}>
+1178:                 <SymbolView name="checkmark.circle.fill" size={12} tintColor="#10B981" />
+1179:                 <Text style={styles.premiumBenefitText}>Envíos gratis y prioridad de entrega</Text>
+1180:               </View>
+1181:             </View>
+1182:           </Pressable>
+1183: 
+1184:           {/* Nueva Sección de Gamificación: La Ruleta de la Suerte 🎰 */}
+1185:           <View style={styles.flashHeaderRow}>
+1186:             <View style={styles.flashTitleContainer}>
+1187:               <Text style={styles.flashSectionTitle}>La Ruleta de la Suerte 🎰</Text>
+1188:               <Text style={styles.wheelSectionSubtitle}>¡Gana un cupón exclusivo de barrio hoy! 1 tirada gratis al día.</Text>
+1189:             </View>
+1190:           </View>
+1191: 
+1192:           <View style={styles.wheelCardOuterContainer}>
+1193:             {wheelState === 'idle' || wheelState === 'spinning' ? (
+1194:               <View style={styles.wheelMainContainer}>
+1195:                 {/* Pointer Needle p
+<truncated 6236 bytes>
+:                           setIsDetailsOpen(true);
+1300:                         }}
+1301:                         onAdd={() => handleAdd(prod.id)}
+1302:                         onRemove={() => handleRemove(prod.id)}
+1303:                         onClear={() => handleClearSelection(prod.id)}
+1304:                         activePrize={wonPrize}
+1305:                       />
+1306:                     ))}
+1307:                   </ScrollView>
+1308:                 </View>
+1309: 
+1310:                 {/* Re-play reset link */}
+1311:                 <Pressable
+1312:                   style={({ pressed }) => [styles.wheelResetLink, pressed && { opacity: 0.7 }]}
+1313:                   onPress={() => {
+1314:                     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+1315:                     setWheelState('idle');
+1316:                     setWonPrize(null);
+1317:                   }}
+1318:                 >
+1319:                   <Text style={styles.wheelResetLinkText}>¿Volver a probar suerte? Gira de nuevo 🔄</Text>
+1320:                 </Pressable>
+1321:               </View>
+1322:             )}
+1323:           </View>
+1324: 
+1325:           {/* 8. Ofertas cerca de ti Section (Stock Muerto de Comercios Locales) */}
+1326:           <View style={styles.sectionHeader}>
+1327:             <Text style={styles.sectionTitle}>Ofertas cerca de ti</Text>
+1328:             <Pressable
+1329:               style={({ pressed }) => [
+1330:                 styles.seeAllButton,
+1331:                 pressed && { opacity: 0.85 }
+1332:               ]}
+1333:             >
+1334:               <Text style={styles.seeAllText}>Ver más</Text>
+1335:             </Pressable>
+1336:           </View>
+1337: 
+1338:           <View style={styles.flashSectionWrapper}>
+1339:             <ScrollView
+1340:               horizontal
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

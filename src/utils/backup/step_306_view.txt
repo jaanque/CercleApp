@@ -1,0 +1,59 @@
+Created At: 2026-05-20T16:40:55Z
+Completed At: 2026-05-20T16:40:55Z
+File Path: `file:///Users/jan/Desktop/CercleApp/src/app/%28tabs%29/index.tsx`
+Total Lines: 2776
+Total Bytes: 82600
+Showing lines 800 to 850
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+800:             compact
+801:             qty={qty}
+802:             onAdd={onAdd}
+803:             onRemove={onRemove}
+804:             onClear={onClear}
+805:           />
+806:         </View>
+807: 
+808:         <View style={styles.gamifiedPriceRow}>
+809:           <View style={styles.dealPriceGroup}>
+810:             <Text style={styles.gamifiedPriceVal} numberOfLines={1}>
+811:               {currentPrice}
+812:             </Text>
+813:             <Text style={styles.dealOriginalPriceVal} numberOfLines={1}>
+814:               {showDiscountPrice ? prod.price : prod.originalPrice}
+815:             </Text>
+816:           </View>
+817:           {activePrize && (
+818:             <View style={styles.gamifiedAppliedBadge}>
+819:               <Text style={styles.gamifiedAppliedText}>CUPÓN APLICADO</Text>
+820:             </View>
+821:           )}
+822:         </View>
+823:       </View>
+824:     </Pressable>
+825:   );
+826: }
+827: 
+828: export default function HomeScreen() {
+829: 
+830:   const router = useRouter();
+831:   const [refreshing, setRefreshing] = useState(false);
+832:   const [selectedCategory, setSelectedCategory] = useState('1');
+833:   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+834:   const [searchQuery, setSearchQuery] = useState('');
+835:   const [isPickupOpen, setIsPickupOpen] = useState(false);
+836:   const [isCerclePlusOpen, setIsCerclePlusOpen] = useState(false);
+837:   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+838: 
+839:   const [quantities, setQuantities] = useState<Record<string, number>>(() => cartStore.get());
+840:   const [favorites, setFavorites] = useState<Record<string, boolean>>(() => favoritesStore.get());
+841:   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+842:   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+843: 
+844:   const [wheelState, setWheelState] = useState<'idle' | 'spinning' | 'won'>('idle');
+845:   const spinAnim = useRef(new Animated.Value(0)).current;
+846:   const [wonPrize, setWonPrize] = useState<typeof WHEEL_PRIZES[number] | null>(null);
+847:   const [couponSecondsLeft, setCouponSecondsLeft] = useState(1800); // 30 minutes
+848: 
+849:   React.useEffect(() => {
+850:     let interval: NodeJS.Timeout | null = null;
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

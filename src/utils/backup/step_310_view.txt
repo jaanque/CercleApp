@@ -1,0 +1,39 @@
+Created At: 2026-05-20T16:41:00Z
+Completed At: 2026-05-20T16:41:00Z
+File Path: `file:///Users/jan/Desktop/CercleApp/src/app/%28tabs%29/index.tsx`
+Total Lines: 2689
+Total Bytes: 79389
+Showing lines 745 to 775
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+745:   const [selectedCategory, setSelectedCategory] = useState('1');
+746:   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
+747:   const [searchQuery, setSearchQuery] = useState('');
+748:   const [isPickupOpen, setIsPickupOpen] = useState(false);
+749:   const [isCerclePlusOpen, setIsCerclePlusOpen] = useState(false);
+750:   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+751: 
+752:   const [quantities, setQuantities] = useState<Record<string, number>>(() => cartStore.get());
+753:   const [favorites, setFavorites] = useState<Record<string, boolean>>(() => favoritesStore.get());
+754:   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+755:   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+756: 
+757:   const [wheelState, setWheelState] = useState<'idle' | 'spinning' | 'won'>('idle');
+758:   const spinAnim = useRef(new Animated.Value(0)).current;
+759:   const [wonPrize, setWonPrize] = useState<typeof WHEEL_PRIZES[number] | null>(null);
+760:   const [couponSecondsLeft, setCouponSecondsLeft] = useState(1800); // 30 minutes
+761: 
+762:   React.useEffect(() => {
+763:     let interval: NodeJS.Timeout | null = null;
+764:     if (wheelState === 'won') {
+765:       interval = setInterval(() => {
+766:         setCouponSecondsLeft((prev) => {
+767:           if (prev <= 1) {
+768:             setWheelState('idle');
+769:             setWonPrize(null);
+770:             return 1800;
+771:           }
+772:           return prev - 1;
+773:         });
+774:       }, 1000);
+775:     }
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

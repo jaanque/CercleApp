@@ -1,0 +1,69 @@
+Created At: 2026-05-20T16:41:02Z
+Completed At: 2026-05-20T16:41:02Z
+File Path: `file:///Users/jan/Desktop/CercleApp/src/app/%28tabs%29/index.tsx`
+Total Lines: 2689
+Total Bytes: 79389
+Showing lines 760 to 820
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+760:   const [couponSecondsLeft, setCouponSecondsLeft] = useState(1800); // 30 minutes
+761: 
+762:   React.useEffect(() => {
+763:     let interval: NodeJS.Timeout | null = null;
+764:     if (wheelState === 'won') {
+765:       interval = setInterval(() => {
+766:         setCouponSecondsLeft((prev) => {
+767:           if (prev <= 1) {
+768:             setWheelState('idle');
+769:             setWonPrize(null);
+770:             return 1800;
+771:           }
+772:           return prev - 1;
+773:         });
+774:       }, 1000);
+775:     }
+776:     return () => {
+777:       if (interval) clearInterval(interval);
+778:     };
+779:   }, [wheelState]);
+780: 
+781:   const handleSpinWheel = () => {
+782:     if (wheelState !== 'idle') return;
+783:     setWheelState('spinning');
+784:     
+785:     // Choose a random prize segment
+786:     const prizeIndex = Math.floor(Math.random() * WHEEL_PRIZES.length);
+787:     const prize = WHEEL_PRIZES[prizeIndex];
+788: 
+789:     spinAnim.setValue(0);
+790:     const finalDegree = 360 * 5 + (prizeIndex * 60) + 30;
+791: 
+792:     Animated.timing(spinAnim, {
+793:       toValue: finalDegree,
+794:       duration: 3500,
+795:       easing: Easing.bezier(0.25, 1, 0.5, 1),
+796:       useNativeDriver: true,
+797:     }).start(() => {
+798:       LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+799:       setWonPrize(prize);
+800:       setWheelState('won');
+801:       setCouponSecondsLeft(1800);
+802:     });
+803:   };
+804: 
+805:   const formatCouponTime = (totalSeconds: number) => {
+806:     const mins = Math.floor(totalSeconds / 60);
+807:     const secs = totalSeconds % 60;
+808:     return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+809:   };
+810: 
+811: 
+812:   useFocusEffect(
+813:     React.useCallback(() => {
+814:       setQuantities(cartStore.get());
+815:       setFavorites(favoritesStore.get());
+816:     }, [])
+817:   );
+818: 
+819:   const handleAdd = (id: string) => {
+820:     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.

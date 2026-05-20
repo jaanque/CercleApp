@@ -1,0 +1,83 @@
+Created At: 2026-05-20T16:39:37Z
+Completed At: 2026-05-20T16:39:37Z
+File Path: `file:///Users/jan/Desktop/CercleApp/src/app/%28tabs%29/index.tsx`
+Total Lines: 2740
+Total Bytes: 82298
+Showing lines 800 to 1400
+The following code has been modified to include a line number before every line, in the format: <line_number>: <original_line>. Please note that any changes targeting the original code should remove the line number, colon, and leading space.
+800:   const [isCerclePlusOpen, setIsCerclePlusOpen] = useState(false);
+801:   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+802: 
+803:   const [quantities, setQuantities] = useState<Record<string, number>>(() => cartStore.get());
+804:   const [favorites, setFavorites] = useState<Record<string, boolean>>(() => favoritesStore.get());
+805:   const [selectedProduct, setSelectedProduct] = useState<any>(null);
+806:   const [isDetailsOpen, setIsDetailsOpen] = useState(false);
+807: 
+808:   const [wheelState, setWheelState] = useState<'idle' | 'spinning' | 'won'>('idle');
+809:   const spinAnim = useRef(new Animated.Value(0)).current;
+810:   const [wonPrize, setWonPrize] = useState<typeof WHEEL_PRIZES[number] | null>(null);
+811:   const [couponSecondsLeft, setCouponSecondsLeft] = useState(1800); // 30 minutes
+812: 
+813:   React.useEffect(() => {
+814:     let interval: NodeJS.Timeout | null = null;
+815:     if (wheelState === 'won') {
+816:       interval = setInterval(() => {
+817:         setCouponSecondsLeft((prev) => {
+818:           if (prev <= 1) {
+819:             setWheelState('idle');
+820:             setWonPrize(null);
+821:             return 1800;
+822:           }
+823:           return prev - 1;
+824:         });
+825:       }, 1000);
+826:     }
+827:     return () => {
+828:       if (interval) clearInterval(interval);
+829:     };
+830:   }, [wheelState]);
+831: 
+832:   const handleSpinWheel = () => {
+833:     if (wheelState !== 'idle') return;
+834:     setWheelState('spinning');
+835:     
+836:     // Choose a random pr
+<truncated 23798 bytes>
+</View>
+1365: 
+1366:                 {/* Unlocked Products Row */}
+1367:                 <View style={styles.unlockedProductsHeader}>
+1368:                   <SymbolView name="lock.open.fill" size={12} tintColor="#10B981" />
+1369:                   <Text style={styles.unlockedProductsText}>PRODUCTOS EXCLUSIVOS CON DESCUENTO APLICADO</Text>
+1370:                 </View>
+1371: 
+1372:                 <View style={styles.unlockedListContainer}>
+1373:                   <ScrollView
+1374:                     horizontal
+1375:                     showsHorizontalScrollIndicator={false}
+1376:                     contentContainerStyle={styles.horizontalSectionContainer}
+1377:                   >
+1378:                     {GAMIFIED_PRODUCTS.map((prod) => (
+1379:                       <GamifiedProductCard
+1380:                         key={prod.id}
+1381:                         prod={prod}
+1382:                         qty={quantities[prod.id] ?? 0}
+1383:                         onPress={() => {
+1384:                           setSelectedProduct(prod);
+1385:                           setIsDetailsOpen(true);
+1386:                         }}
+1387:                         onAdd={() => handleAdd(prod.id)}
+1388:                         onRemove={() => handleRemove(prod.id)}
+1389:                         onClear={() => handleClearSelection(prod.id)}
+1390:                         activePrize={wonPrize}
+1391:                       />
+1392:                     ))}
+1393:                   </ScrollView>
+1394:                 </View>
+1395: 
+1396:                 {/* Re-play reset link */}
+1397:                 <Pressable
+1398:                   style={({ pressed }) => [styles.wheelResetLink, pressed && { opacity: 0.7 }]}
+1399:                   onPress={() => {
+1400:                     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+The above content does NOT show the entire file contents. If you need to view any lines of the file which were not shown to complete your task, call this tool again to view those lines.
