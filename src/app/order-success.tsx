@@ -366,7 +366,7 @@ const styles = StyleSheet.create({
     height: '100%',
   },
   mapOverlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(17, 24, 39, 0.02)',
   },
   mapPinContainer: {

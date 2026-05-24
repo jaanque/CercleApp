@@ -149,6 +149,7 @@ export function CerclePlusBottomSheet({ visible, onClose }: CerclePlusBottomShee
           <ScrollView
             horizontal
             showsHorizontalScrollIndicator={false}
+            style={styles.benefitsScrollView}
             contentContainerStyle={styles.cardsContainer}
           >
             {BENEFITS.map((b, i) => (
@@ -198,7 +199,7 @@ export function CerclePlusBottomSheet({ visible, onClose }: CerclePlusBottomShee
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'flex-end' },
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0,0,0,0.4)',
   },
   dismissArea: { flex: 1 },
@@ -298,10 +299,12 @@ const styles = StyleSheet.create({
     marginTop: 2,
   },
 
-  // Cards
+  benefitsScrollView: {
+    marginHorizontal: -20,
+  },
   cardsContainer: {
+    paddingHorizontal: 20,
     gap: 12,
-    paddingRight: 4,
     marginBottom: 20,
   },
   benefitCard: {

@@ -1,6 +1,7 @@
 import { CerclePlusBottomSheet } from '@/components/cercle-plus-bottom-sheet';
 import { PickupBottomSheet } from '@/components/pickup-bottom-sheet';
 import { ProductDetailsSheet } from '@/components/product-details-sheet';
+import { supabase } from '@/lib/supabase';
 import { cartStore } from '@/utils/cartStore';
 import { favoritesStore } from '@/utils/favoritesStore';
 import { Image } from 'expo-image';
@@ -8,11 +9,11 @@ import * as Location from 'expo-location';
 import { useFocusEffect, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SymbolView } from 'expo-symbols';
-import React, { useRef, useState } from 'react';
-import { Animated, Dimensions, Easing, LayoutAnimation, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
+import React, { useEffect, useRef, useState } from 'react';
+import { ActivityIndicator, Animated, Dimensions, Easing, LayoutAnimation, Pressable, RefreshControl, ScrollView, StyleSheet, Text, TextInput, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 
-const FEATURED_PRODUCTS = [
+export const FEATURED_PRODUCTS = [
   {
     id: 'p1',
     name: 'Chaqueta Oversize',
@@ -135,102 +136,18 @@ const FEATURED_PRODUCTS = [
   }
 ];
 
-const LOOKS_DATA = [
-  {
-    id: 'l1',
-    title: 'Look Urbano',
-    emoji: '🏙️',
-    image: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?auto=format&fit=crop&w=800&q=80',
-    description: 'Estilo streetwear perfecto para recorrer tu barrio con comodidad y estilo.',
-    comboPrice: '99 €',
-    originalPrice: '129 €',
-    discountText: '¡Ahorras 30 € con este pack!',
-    items: [
-      {
-        id: 'p1',
-        name: 'Chaqueta Oversize',
-        price: '29 €',
-        originalPrice: '89 €',
-        store: 'Retro Vintage',
-        x: '45%',
-        y: '35%',
-      },
-      {
-        id: 'p2',
-        name: 'Zapatillas Blancas',
-        price: '45 €',
-        originalPrice: '120 €',
-        store: 'Urban Sneaks',
-        x: '62%',
-        y: '80%',
-      },
-      {
-        id: 'p3',
-        name: 'Bolso de Piel',
-        price: '55 €',
-        originalPrice: '180 €',
-        store: 'Leather Works',
-        x: '70%',
-        y: '55%',
-      }
-    ]
-  },
-  {
-    id: 'l2',
-    title: 'Tarde de Café',
-    emoji: '☕',
-    image: 'https://images.unsplash.com/photo-1485968579580-b6d095142e6e?auto=format&fit=crop&w=800&q=80',
-    description: 'Un outfit relajado e ideal para tus tardes en la cafetería del barrio.',
-    comboPrice: '39 €',
-    originalPrice: '53 €',
-    discountText: '¡Ahorras 14 € con este pack!',
-    items: [
-      {
-        id: 'p4',
-        name: 'Vestido Floral',
-        price: '19 €',
-        originalPrice: '65 €',
-        store: 'Boho Chic',
-        x: '42%',
-        y: '48%',
-      },
-      {
-        id: 'p5',
-        name: 'Gafas de Sol Pro',
-        price: '12 €',
-        originalPrice: '40 €',
-        store: 'Specs Studio',
-        x: '48%',
-        y: '22%',
-      },
-      {
-        id: 'p6',
-        name: 'Jersey de Lana',
-        price: '22 €',
-        originalPrice: '70 €',
-        store: 'Retro Vintage',
-        x: '30%',
-        y: '65%',
-      }
-    ]
-  }
-];
-
-
 const { width: SCREEN_WIDTH, height: SCREEN_HEIGHT } = Dimensions.get('window');
 const DEAL_CARD_WIDTH = 274;
 const DEAL_IMAGE_HEIGHT = 142;
 const STORE_IMAGE_HEIGHT = Math.round((SCREEN_WIDTH - 40) * (9 / 16));
 
 
-const CATEGORIES = [
-  { id: '1', title: 'Todos', emoji: '🛍️' },
-  { id: '2', title: 'Moda', emoji: '👗' },
-  { id: '3', title: 'Tech', emoji: '💻' },
-  { id: '4', title: 'Hogar', emoji: '🏠' },
-  { id: '5', title: 'Deportes', emoji: '🏀' },
-  { id: '6', title: 'Belleza', emoji: '💄' },
-];
+export interface Category {
+  id: string;
+  title: string;
+  emoji: string;
+  isAI?: boolean;
+}
 
 const NEARBY_STORES = [
   {
@@ -495,7 +412,7 @@ function ProductQuantityControl({ qty, onAdd, onRemove, onClear, compact }: Prod
       <Animated.View
         pointerEvents={qty === 0 ? 'auto' : 'none'}
         style={[
-          StyleSheet.absoluteFillObject,
+          StyleSheet.absoluteFill,
           {
             opacity: addButtonOpacity,
             transform: [{ scale: addButtonScale }],
@@ -523,7 +440,7 @@ function ProductQuantityControl({ qty, onAdd, onRemove, onClear, compact }: Prod
         pointerEvents={qty > 0 ? 'auto' : 'none'}
         style={[
           styles.qtyRowContainer,
-          StyleSheet.absoluteFillObject,
+          StyleSheet.absoluteFill,
           {
             marginTop: 0,
             opacity: selectorOpacity,
@@ -595,7 +512,7 @@ function ProductQuantityControl({ qty, onAdd, onRemove, onClear, compact }: Prod
   );
 }
 
-type FeaturedProduct = (typeof FEATURED_PRODUCTS)[number];
+export type FeaturedProduct = (typeof FEATURED_PRODUCTS)[number];
 
 interface DealProductCardProps {
   prod: FeaturedProduct;
@@ -618,7 +535,7 @@ function NearbyStoreCard({ store, onPress }: { store: NearbyStore; onPress: () =
         <Image source={{ uri: store.image }} style={styles.storeImage} contentFit="cover" />
         {store.hasStamps ? (
           <View style={styles.stampBadgeOnImage}>
-            <SymbolView name="checkmark.seal.fill" size={11} tintColor="#D97706" />
+            <SymbolView name="checkmark.seal.fill" size={11} tintColor="#111827" />
             <Text style={styles.stampBadgeTextOnImage}>Sellos</Text>
           </View>
         ) : null}
@@ -680,7 +597,7 @@ function DealProductCard({ prod, qty, onPress, onAdd, onRemove, onClear }: DealP
       <View style={styles.dealImageContainer}>
         <Image source={{ uri: prod.image }} style={styles.dealImage} contentFit="cover" />
         <View style={styles.discountBadge}>
-          <Text style={styles.discountText}>-{savingsVal}€</Text>
+          <Text style={styles.discountText}>Ahorras {savingsVal}€</Text>
         </View>
       </View>
 
@@ -735,19 +652,88 @@ function DealProductCard({ prod, qty, onPress, onAdd, onRemove, onClear }: DealP
     </Pressable>
   );
 }
-
+export { DealProductCard };
 
 
 export default function HomeScreen() {
 
   const router = useRouter();
   const [refreshing, setRefreshing] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState('1');
+  const [categories, setCategories] = useState<Category[]>([
+    { id: 'todos', title: 'Todos', emoji: '🛍️' },
+  ]);
+  const [selectedCategory, setSelectedCategory] = useState('todos');
   const [isSearchExpanded, setIsSearchExpanded] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [isPickupOpen, setIsPickupOpen] = useState(false);
   const [isCerclePlusOpen, setIsCerclePlusOpen] = useState(false);
   const [userLocation, setUserLocation] = useState<{ latitude: number; longitude: number } | null>(null);
+
+  const [earnedStamps, setEarnedStamps] = useState<number | null>(null);
+  const [totalStamps, setTotalStamps] = useState<number | null>(null);
+
+  const loadUserStamps = React.useCallback(async () => {
+    try {
+      const { data: { user }, error: authError } = await supabase.auth.getUser();
+      if (authError || !user) {
+        setEarnedStamps(1); // Offline welcome fallback
+        setTotalStamps(5);
+        return;
+      }
+
+      const { data, error } = await supabase
+        .from('user_stamps')
+        .select('*')
+        .eq('user_id', user.id)
+        .single();
+
+      if (!error && data) {
+        setEarnedStamps(data.earned_stamps);
+        setTotalStamps(data.total_stamps);
+      } else {
+        setEarnedStamps(1); // Welcome fallback until table is created
+        setTotalStamps(5);
+      }
+    } catch (err: any) {
+      console.warn('Error loading stamps in Home:', err?.message || err);
+      setEarnedStamps(1);
+      setTotalStamps(5);
+    }
+  }, []);
+
+  const loadCategories = React.useCallback(async () => {
+    try {
+      const { data, error } = await supabase
+        .from('categories')
+        .select('*')
+        .order('order_index', { ascending: true });
+
+      if (error) {
+        console.error('Error loading categories from Supabase:', error);
+        return;
+      }
+
+      if (data && data.length > 0) {
+        const dbCategories: Category[] = data.map((cat: any) => ({
+          id: String(cat.id),
+          title: cat.title,
+          emoji: cat.emoji,
+          isAI: cat.is_ai,
+        }));
+
+        setCategories([
+          { id: 'todos', title: 'Todos', emoji: '🛍️' },
+          ...dbCategories
+        ]);
+      }
+    } catch (err) {
+      console.error('Exception loading categories:', err);
+    }
+  }, []);
+
+  useEffect(() => {
+    loadCategories();
+  }, [loadCategories]);
 
   const [quantities, setQuantities] = useState<Record<string, number>>(() => cartStore.get());
   const [favorites, setFavorites] = useState<Record<string, boolean>>(() => favoritesStore.get());
@@ -778,7 +764,8 @@ export default function HomeScreen() {
     React.useCallback(() => {
       setQuantities(cartStore.get());
       setFavorites(favoritesStore.get());
-    }, [])
+      loadUserStamps();
+    }, [loadUserStamps])
   );
 
   const handleAdd = (id: string) => {
@@ -866,13 +853,11 @@ export default function HomeScreen() {
     }
   }, [isSearchExpanded, searchAnim]);
 
-  const onRefresh = React.useCallback(() => {
+  const onRefresh = React.useCallback(async () => {
     setRefreshing(true);
-    // Simulate a network request
-    setTimeout(() => {
-      setRefreshing(false);
-    }, 2000);
-  }, []);
+    await loadCategories();
+    setRefreshing(false);
+  }, [loadCategories]);
 
   const insets = useSafeAreaInsets();
 
@@ -911,7 +896,7 @@ export default function HomeScreen() {
         return matchesName || matchesCategory || matchesTagline;
       }
 
-      const activeCat = CATEGORIES.find(c => c.id === selectedCategory);
+      const activeCat = categories.find(c => c.id === selectedCategory);
       if (activeCat) {
         if (activeCat.title === 'Todos') return true;
         if (activeCat.title === 'Moda') return store.category === 'Ropa & Accesorios';
@@ -925,7 +910,7 @@ export default function HomeScreen() {
 
     // 3. Sort list by distance ascending (nearest first)
     return filtered.sort((a, b) => a.distanceVal - b.distanceVal);
-  }, [userLocation, searchQuery, selectedCategory]);
+  }, [userLocation, searchQuery, selectedCategory, categories]);
 
   const searchHeight = searchAnim.interpolate({
     inputRange: [0, 1],
@@ -1000,9 +985,11 @@ export default function HomeScreen() {
             <SymbolView
               name="checkmark.seal.fill"
               size={16}
-              tintColor="#F59E0B"
+              tintColor="#111827"
             />
-            <Text style={styles.pointsPillText}>1/5</Text>
+            <Text style={styles.pointsPillText}>
+              {earnedStamps !== null && totalStamps !== null ? `${earnedStamps}/${totalStamps}` : '...'}
+            </Text>
           </Pressable>
         </View>
 
@@ -1061,27 +1048,47 @@ export default function HomeScreen() {
               showsHorizontalScrollIndicator={false}
               contentContainerStyle={styles.categoriesContainer}
             >
-              {CATEGORIES.map((cat) => {
+              {categories.map((cat) => {
+                if (!cat || !cat.id) return null;
                 const isSelected = selectedCategory === cat.id;
+                const isAI = 'isAI' in cat && cat.isAI;
                 return (
                   <Pressable
                     key={cat.id}
-                    onPress={() => setSelectedCategory(cat.id)}
+                    onPress={() => {
+                      if (isAI) {
+                        router.push('/ai-chat');
+                        return;
+                      }
+                      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+                      setSelectedCategory(cat.id);
+                    }}
                     style={({ pressed }) => [
                       styles.categoryItem,
                       pressed && { opacity: 0.85, transform: [{ scale: 0.96 }] }
                     ]}
                   >
-                    <View style={[
-                      styles.categorySquare,
-                      isSelected && styles.categorySquareSelected
-                    ]}>
+                    <View
+                      style={[
+                        styles.categorySquare,
+                        isSelected && styles.categorySquareSelected,
+                        isAI && styles.categorySquareAI,
+                      ]}
+                    >
                       <Text style={styles.categoryEmoji}>{cat.emoji}</Text>
                     </View>
-                    <Text style={[
-                      styles.categoryText,
-                      isSelected && styles.categoryTextSelected
-                    ]}>{cat.title}</Text>
+                    <Text
+                      style={[
+                        styles.categoryText,
+                        isSelected && styles.categoryTextSelected,
+                        isAI && styles.categoryTextAI
+                      ]}
+                    >
+                      {cat.title}
+                    </Text>
+                    {isSelected && !isAI && (
+                      <View style={styles.categoryActiveDot} />
+                    )}
                   </Pressable>
                 );
               })}
@@ -1096,54 +1103,43 @@ export default function HomeScreen() {
             ]}
             onPress={() => router.push('/sellos')}
           >
-            <View style={styles.homeStampLeft}>
-              <View style={styles.homeStampHeaderRow}>
-                <SymbolView name="checkmark.seal.fill" size={13} tintColor="#D97706" />
-                <Text style={styles.homeStampTitle}>Tarjeta de sellos</Text>
+            {earnedStamps === null || totalStamps === null ? (
+              <View style={{ flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'center', height: 44 }}>
+                <ActivityIndicator size="small" color="#111827" />
+                <Text style={{ marginLeft: 8, fontSize: 12, fontWeight: '600', color: '#6B7280' }}>
+                  Sincronizando sellos...
+                </Text>
               </View>
-              <Text style={styles.homeStampSubtitle}>1 de 5 completados</Text>
-            </View>
-            <View style={styles.homeStampRight}>
-              <View style={styles.homeStampSlots}>
-                {Array.from({ length: 5 }).map((_, i) => (
-                  <View
-                    key={i}
-                    style={[
-                      styles.homeStampDot,
-                      i < 1 && styles.homeStampDotFilled
-                    ]}
-                  >
-                    {i < 1 && <SymbolView name="checkmark" size={6} tintColor="#D97706" />}
+            ) : (
+              <>
+                <View style={styles.homeStampLeft}>
+                  <View style={styles.homeStampHeaderRow}>
+                    <SymbolView name="checkmark.seal.fill" size={13} tintColor="#111827" />
+                    <Text style={styles.homeStampTitle}>Tarjeta de sellos</Text>
                   </View>
-                ))}
-              </View>
-              <SymbolView name="chevron.right" size={13} tintColor="#9CA3AF" style={{ marginLeft: 4 }} />
-            </View>
-          </Pressable>
-
-          {/* 5. AI Assistant Banner (Cercle AI) */}
-          <Pressable
-            style={({ pressed }) => [
-              styles.aiBanner,
-              pressed && { opacity: 0.92, transform: [{ scale: 0.98 }] }
-            ]}
-            onPress={() => router.push('/ai-chat')}
-          >
-            <View style={styles.aiLeftContent}>
-              <View style={styles.aiLogoRow}>
-                <SymbolView name="sparkles" size={13} tintColor="#1F2937" />
-                <Text style={styles.aiTitle}>Cercle AI</Text>
-                <View style={styles.aiBetaBadge}>
-                  <Text style={styles.aiBetaText}>BETA</Text>
+                  <Text style={styles.homeStampSubtitle}>{earnedStamps} de {totalStamps} completados</Text>
                 </View>
-              </View>
-              <Text style={styles.aiSubtitle} numberOfLines={1}>Busca regalos o productos con nuestra IA</Text>
-            </View>
-
-            <View style={styles.aiCTAButton}>
-              <Text style={styles.aiCTABtnText}>Preguntar</Text>
-            </View>
+                <View style={styles.homeStampRight}>
+                  <View style={styles.homeStampSlots}>
+                    {Array.from({ length: totalStamps }).map((_, i) => (
+                      <View
+                        key={i}
+                        style={[
+                          styles.homeStampDot,
+                          i < earnedStamps && styles.homeStampDotFilled
+                        ]}
+                      >
+                        {i < earnedStamps && <SymbolView name="checkmark" size={6} tintColor="#111827" />}
+                      </View>
+                    ))}
+                  </View>
+                  <SymbolView name="chevron.right" size={13} tintColor="#9CA3AF" style={{ marginLeft: 4 }} />
+                </View>
+              </>
+            )}
           </Pressable>
+
+
 
           {/* 3. Cercle+ Premium Banner (Taller Stacked Style) */}
           <Pressable
@@ -1181,188 +1177,7 @@ export default function HomeScreen() {
             </View>
           </Pressable>
 
-          {/* Lookbook Tabs Selector */}
-          <View style={styles.lookbookTabsContainer}>
-            {LOOKS_DATA.map((look) => {
-              const isSelected = activeLookId === look.id;
-              return (
-                <Pressable
-                  key={look.id}
-                  onPress={() => {
-                    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                    setActiveLookId(look.id as 'l1' | 'l2');
-                    setActiveHotspotId(null);
-                  }}
-                  style={({ pressed }) => [
-                    styles.lookbookTabButton,
-                    isSelected && styles.lookbookTabButtonActive,
-                    pressed && { opacity: 0.85 }
-                  ]}
-                >
-                  <Text style={[
-                    styles.lookbookTabText,
-                    isSelected && styles.lookbookTabTextActive
-                  ]}>
-                    {look.emoji} {look.title}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
 
-          {/* Lookbook Card Canvas */}
-          {(() => {
-            const currentLook = LOOKS_DATA.find(l => l.id === activeLookId)!;
-
-            // Check if user has ALL items of this look in their cart
-            const hasAllItems = currentLook.items.every(item => (quantities[item.id] || 0) > 0);
-
-            return (
-              <View style={styles.lookbookCanvasCard}>
-                {/* Main Lifestyle Image */}
-                <Image
-                  source={{ uri: currentLook.image }}
-                  style={styles.lookbookImage}
-                  contentFit="cover"
-                />
-
-                {/* Relative Hotspots Layer */}
-                <View style={StyleSheet.absoluteFillObject}>
-                  {currentLook.items.map((item) => {
-                    const isActive = activeHotspotId === item.id;
-
-                    // Animated Pulsing ring styles
-                    const scalePulse = pulsingAnim.interpolate({
-                      inputRange: [0, 1],
-                      outputRange: [1, 2.4],
-                    });
-                    const opacityPulse = pulsingAnim.interpolate({
-                      inputRange: [0, 0.8, 1],
-                      outputRange: [0.6, 0.3, 0],
-                    });
-
-                    return (
-                      <View
-                        key={item.id}
-                        style={[
-                          styles.hotspotContainer,
-                          { top: item.y as any, left: item.x as any }
-                        ]}
-                      >
-                        {/* Glow Pulsing Ring */}
-                        <Animated.View
-                          style={[
-                            styles.hotspotPulse,
-                            {
-                              transform: [{ scale: scalePulse }],
-                              opacity: opacityPulse,
-                            }
-                          ]}
-                        />
-                        {/* Glowing core dot */}
-                        <Pressable
-                          style={({ pressed }) => [
-                            styles.hotspotDot,
-                            isActive && styles.hotspotDotActive,
-                            pressed && { transform: [{ scale: 0.9 }] }
-                          ]}
-                          onPress={() => {
-                            LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                            setActiveHotspotId(activeHotspotId === item.id ? null : item.id);
-                          }}
-                        >
-                          <SymbolView
-                            name={isActive ? "multiply" : "plus"}
-                            size={10}
-                            tintColor="#FFFFFF"
-                          />
-                        </Pressable>
-
-                        {/* Glassmorphic Tooltip Card overlay */}
-                        {isActive && (
-                          <View style={styles.tooltipCard}>
-                            <View style={styles.tooltipHeader}>
-                              <Text style={styles.tooltipName} numberOfLines={1}>
-                                {item.name}
-                              </Text>
-                              <Text style={styles.tooltipStore} numberOfLines={1}>
-                                {item.store}
-                              </Text>
-                            </View>
-
-                            <View style={styles.tooltipPricingRow}>
-                              <View style={styles.tooltipPriceGroup}>
-                                <Text style={styles.tooltipPrice}>{item.price}</Text>
-                                <Text style={styles.tooltipOrigPrice}>{item.originalPrice}</Text>
-                              </View>
-
-                              <Pressable
-                                style={({ pressed }) => [
-                                  styles.tooltipAddBtn,
-                                  (quantities[item.id] || 0) > 0 && styles.tooltipAddBtnActive,
-                                  pressed && { opacity: 0.8, transform: [{ scale: 0.95 }] }
-                                ]}
-                                onPress={() => {
-                                  if ((quantities[item.id] || 0) > 0) {
-                                    handleRemove(item.id);
-                                  } else {
-                                    handleAdd(item.id);
-                                  }
-                                }}
-                              >
-                                <Text style={[
-                                  styles.tooltipAddBtnText,
-                                  (quantities[item.id] || 0) > 0 && styles.tooltipAddBtnTextActive
-                                ]}>
-                                  {(quantities[item.id] || 0) > 0 ? `${quantities[item.id]} en bolsa` : 'Añadir +'}
-                                </Text>
-                              </Pressable>
-                            </View>
-                          </View>
-                        )}
-                      </View>
-                    );
-                  })}
-                </View>
-
-                {/* Bottom combo control bar */}
-                <View style={styles.lookbookComboBar}>
-                  <View style={styles.comboInfoColumn}>
-                    <Text style={styles.comboTitle}>Pack {currentLook.title}</Text>
-                    <Text style={styles.comboSavings}>{currentLook.discountText}</Text>
-                  </View>
-                  <View style={styles.comboPriceWrapper}>
-                    <Text style={styles.comboOriginalPrice}>{currentLook.originalPrice}</Text>
-                    <Text style={styles.comboPriceText}>{currentLook.comboPrice}</Text>
-                  </View>
-                  <Pressable
-                    style={({ pressed }) => [
-                      styles.comboAddButton,
-                      hasAllItems && styles.comboAddButtonActive,
-                      pressed && { opacity: 0.88, transform: [{ scale: 0.97 }] }
-                    ]}
-                    onPress={() => {
-                      LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-                      // Add ALL products of the look to cart
-                      const nextQuantities = { ...quantities };
-                      currentLook.items.forEach(item => {
-                        nextQuantities[item.id] = Math.max((nextQuantities[item.id] || 0), 1);
-                      });
-                      setQuantities(nextQuantities);
-                      cartStore.set(nextQuantities);
-                    }}
-                  >
-                    <Text style={[
-                      styles.comboAddButtonText,
-                      hasAllItems && styles.comboAddButtonTextActive
-                    ]}>
-                      {hasAllItems ? '¡Pack Añadido! 🛍️' : 'Añadir Pack'}
-                    </Text>
-                  </Pressable>
-                </View>
-              </View>
-            );
-          })()}
 
           {/* 8. Ofertas cerca de ti Section (Stock Muerto de Comercios Locales) */}
           <View style={styles.sectionHeader}>
@@ -1500,7 +1315,7 @@ export default function HomeScreen() {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
-  contentCard: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 12, borderTopRightRadius: 12, paddingHorizontal: 20, paddingTop: 0, minHeight: SCREEN_HEIGHT },
+  contentCard: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingHorizontal: 20, paddingTop: 0, minHeight: SCREEN_HEIGHT },
 
   headerContainer: {
     backgroundColor: '#FFFFFF',
@@ -1522,7 +1337,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     paddingHorizontal: 12,
     height: 40,
-    borderRadius: 12,
+    borderRadius: 22,
     gap: 6,
     borderWidth: 1,
     borderColor: '#E5E7EB',
@@ -1546,7 +1361,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F3F4F6',
-    borderRadius: 12,
+    borderRadius: 22,
     paddingHorizontal: 12,
     height: 44,
     borderWidth: 1,
@@ -1571,7 +1386,7 @@ const styles = StyleSheet.create({
     paddingVertical: 40,
     paddingHorizontal: 20,
     backgroundColor: '#F9FAFB',
-    borderRadius: 16,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     borderStyle: 'dashed',
@@ -1579,7 +1394,7 @@ const styles = StyleSheet.create({
   emptyStateIconBadge: {
     width: 52,
     height: 52,
-    borderRadius: 14,
+    borderRadius: 22,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1601,7 +1416,7 @@ const styles = StyleSheet.create({
   headerButton: {
     width: 40,
     height: 40,
-    borderRadius: 12,
+    borderRadius: 22,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1614,47 +1429,74 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     height: 40,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#FEF3C7',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderRadius: 12,
+    borderColor: '#FEF3C7',
+    borderRadius: 22,
     paddingHorizontal: 12,
   },
   pointsPillText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#1F2937',
+    color: '#111827',
   },
 
-  categoriesWrapper: { marginHorizontal: -20, marginBottom: 14 },
-  categoriesContainer: { paddingHorizontal: 20, gap: 10 },
-  categoryItem: { alignItems: 'center', gap: 6, width: 64 },
+  categoriesWrapper: { marginHorizontal: -20, marginBottom: 24 },
+  categoriesContainer: { paddingHorizontal: 20, gap: 12, paddingVertical: 6 },
+  categoryItem: { alignItems: 'center', width: 62, position: 'relative' },
   categorySquare: {
     width: 62,
     height: 62,
-    borderRadius: 12,
+    borderRadius: 22,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#E5E7EB',
+    borderColor: 'transparent',
+    marginBottom: 6,
   },
   categorySquareSelected: {
-    backgroundColor: '#ECFDF5',
-    borderColor: '#10B981',
+    backgroundColor: '#FFFFFF',
+    borderColor: '#111827',
     borderWidth: 1.5,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    elevation: 2,
   },
   categoryEmoji: { fontSize: 26 },
-  categoryText: { fontSize: 11.5, fontWeight: '600', color: '#1F2937', textAlign: 'center' },
+  categoryText: { fontSize: 11.5, fontWeight: '600', color: '#6B7280', textAlign: 'center' },
   categoryTextSelected: {
-    color: '#10B981',
+    color: '#111827',
+    fontWeight: '800',
+  },
+  categoryActiveDot: {
+    width: 6,
+    height: 4,
+    borderRadius: 22,
+    backgroundColor: '#111827',
+    marginTop: 4,
+  },
+  categorySquareAI: {
+    backgroundColor: '#EEF2FF',
+    borderColor: '#6366F1',
+    borderWidth: 1.5,
+    shadowColor: '#6366F1',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 4,
+    elevation: 3,
+  },
+  categoryTextAI: {
+    color: '#4F46E5',
     fontWeight: '700',
   },
 
-  mainPromoWrapper: { marginBottom: 32 },
+  mainPromoWrapper: { marginBottom: 24 },
   mainPromoCard: {
     height: 180,
-    borderRadius: 12,
+    borderRadius: 22,
     overflow: 'hidden',
     backgroundColor: '#F3F4F6',
     justifyContent: 'flex-end',
@@ -1680,7 +1522,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0, 0, 0, 0.45)',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 22,
     zIndex: 2
   },
   promoBadgeText: {
@@ -1691,16 +1533,16 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase'
   },
   paginationDots: { flexDirection: 'row', justifyContent: 'center', alignItems: 'center', gap: 6, marginTop: 16 },
-  dot: { width: 6, height: 6, borderRadius: 3, backgroundColor: '#E5E7EB' },
-  dotActive: { width: 18, height: 6, borderRadius: 3, backgroundColor: '#1F2937' },
+  dot: { width: 6, height: 6, borderRadius: 22, backgroundColor: '#E5E7EB' },
+  dotActive: { width: 18, height: 6, borderRadius: 22, backgroundColor: '#1F2937' },
 
-  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 },
+  sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   sectionTitle: { fontSize: 18, fontWeight: '800', color: '#1A1A1A' },
   seeAllButton: {
     backgroundColor: '#F3F4F6',
     paddingHorizontal: 12,
     height: 32,
-    borderRadius: 10,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     justifyContent: 'center',
@@ -1708,7 +1550,7 @@ const styles = StyleSheet.create({
   },
   seeAllText: { fontSize: 12, fontWeight: '600', color: '#1F2937' },
 
-  storesList: { gap: 20, marginBottom: 32 },
+  storesList: { gap: 20, marginBottom: 24 },
   storeCard: {
     width: '100%',
     backgroundColor: '#FFFFFF',
@@ -1718,7 +1560,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: STORE_IMAGE_HEIGHT,
     backgroundColor: '#F3F4F6',
-    borderRadius: 12,
+    borderRadius: 22,
     overflow: 'hidden',
   },
   storeImage: {
@@ -1743,7 +1585,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FEF3C7',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 8,
+    borderRadius: 22,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 3.5,
@@ -1756,7 +1598,7 @@ const styles = StyleSheet.create({
   stampBadgeTextOnImage: {
     fontSize: 10.5,
     fontWeight: '800',
-    color: '#D97706',
+    color: '#111827',
   },
   storeDistancePill: {
     fontSize: 12,
@@ -1778,7 +1620,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ECFDF5',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: 22,
   },
   popularBadgeText: {
     fontSize: 11,
@@ -1786,7 +1628,8 @@ const styles = StyleSheet.create({
     color: '#047857',
   },
 
-  horizontalSectionWrapper: { marginHorizontal: -20, marginBottom: 32 },
+
+  horizontalSectionWrapper: { marginHorizontal: -20, marginBottom: 24 },
   horizontalSectionContainer: { paddingHorizontal: 20, gap: 14 },
 
   // Redesigned local deadstock headers and wrapper
@@ -1805,7 +1648,7 @@ const styles = StyleSheet.create({
     width: '100%',
     height: DEAL_IMAGE_HEIGHT,
     backgroundColor: '#F3F4F6',
-    borderRadius: 12,
+    borderRadius: 22,
     overflow: 'hidden',
     position: 'relative',
   },
@@ -1815,7 +1658,7 @@ const styles = StyleSheet.create({
     right: 8,
     width: 26,
     height: 26,
-    borderRadius: 13,
+    borderRadius: 22,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     alignItems: 'center',
     justifyContent: 'center',
@@ -1835,7 +1678,7 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(17, 24, 39, 0.72)',
     paddingHorizontal: 8,
     paddingVertical: 4,
-    borderRadius: 6,
+    borderRadius: 22,
     zIndex: 2,
   },
   discountText: { color: '#FFFFFF', fontSize: 11, fontWeight: '700' },
@@ -1905,7 +1748,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     gap: 4,
     backgroundColor: '#FFFBEB',
-    borderRadius: 6,
+    borderRadius: 22,
     paddingHorizontal: 6,
     paddingVertical: 3,
     flexShrink: 1,
@@ -1917,7 +1760,7 @@ const styles = StyleSheet.create({
   dealStockDot: {
     width: 5,
     height: 5,
-    borderRadius: 3,
+    borderRadius: 22,
     backgroundColor: '#F59E0B',
     flexShrink: 0,
   },
@@ -1939,7 +1782,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#0D9488',
-    borderRadius: 6,
+    borderRadius: 22,
     paddingHorizontal: 5,
     paddingVertical: 2,
     marginLeft: 6,
@@ -1953,7 +1796,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#ECFDF5',
-    borderRadius: 6,
+    borderRadius: 22,
     paddingHorizontal: 5,
     paddingVertical: 2,
     marginLeft: 6,
@@ -1981,7 +1824,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ECFDF5',
     paddingHorizontal: 6,
     paddingVertical: 1.5,
-    borderRadius: 6,
+    borderRadius: 22,
   },
   dealPopularBadgeText: {
     fontSize: 10,
@@ -1999,13 +1842,13 @@ const styles = StyleSheet.create({
     height: 4,
     width: '100%',
     backgroundColor: '#F3F4F6',
-    borderRadius: 2,
+    borderRadius: 22,
     overflow: 'hidden',
   },
   stockProgressBarFill: {
     height: '100%',
     backgroundColor: '#F59E0B',
-    borderRadius: 2,
+    borderRadius: 22,
   },
   stockText: {
     fontSize: 9.5,
@@ -2020,7 +1863,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#ECFDF5',
     paddingHorizontal: 8,
     paddingVertical: 3.5,
-    borderRadius: 6,
+    borderRadius: 22,
     alignSelf: 'flex-start',
     marginTop: 2,
     marginBottom: 4,
@@ -2037,7 +1880,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     backgroundColor: '#F3F4F6',
     height: 34,
-    borderRadius: 10,
+    borderRadius: 22,
     width: '100%',
   },
   addButtonText: {
@@ -2051,7 +1894,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#F3F4F6',
     height: 34,
-    borderRadius: 12,
+    borderRadius: 22,
     marginTop: 5,
     paddingHorizontal: 6,
   },
@@ -2068,7 +1911,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#F3F4F6',
     height: 34,
-    borderRadius: 10,
+    borderRadius: 22,
     paddingHorizontal: 4,
     minWidth: 0,
   },
@@ -2076,7 +1919,7 @@ const styles = StyleSheet.create({
     width: 34,
     height: 34,
     flexShrink: 0,
-    borderRadius: 12,
+    borderRadius: 22,
     backgroundColor: '#FEE2E2',
     alignItems: 'center',
     justifyContent: 'center',
@@ -2086,7 +1929,7 @@ const styles = StyleSheet.create({
   qtyBtn: {
     width: 26,
     height: 26,
-    borderRadius: 8,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -2099,7 +1942,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#EF4444',
     paddingHorizontal: 8,
     paddingVertical: 3,
-    borderRadius: 8,
+    borderRadius: 22,
   },
   flashBadgeText: {
     color: '#FFFFFF',
@@ -2107,7 +1950,7 @@ const styles = StyleSheet.create({
     fontWeight: '900',
   },
 
-  impactBanner: { backgroundColor: '#ECFDF5', padding: 16, borderRadius: 16, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 32 },
+  impactBanner: { backgroundColor: '#ECFDF5', padding: 16, borderRadius: 22, flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: 24 },
   impactContent: { flexDirection: 'row', alignItems: 'center', gap: 12 },
   impactTitle: { fontSize: 16, fontWeight: '800', color: '#065F46' },
   impactSubtitle: { fontSize: 12, fontWeight: '500', color: '#047857' },
@@ -2115,18 +1958,18 @@ const styles = StyleSheet.create({
   impactStatValue: { fontSize: 18, fontWeight: '900', color: '#059669' },
   impactStatLabel: { fontSize: 10, fontWeight: '700', color: '#10B981', textTransform: 'uppercase' },
 
-  mysteryCard: { width: 280, height: 160, borderRadius: 20, overflow: 'hidden', backgroundColor: '#F3F4F6' },
+  mysteryCard: { width: 280, height: 160, borderRadius: 22, overflow: 'hidden', backgroundColor: '#F3F4F6' },
 
   rescuerItem: { width: 90, alignItems: 'center', gap: 8 },
   rescuerAvatarWrapper: {
     width: 70,
     height: 70,
-    borderRadius: 12,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     overflow: 'hidden'
   },
-  rescuerAvatar: { width: '100%', height: '100%', borderRadius: 11, backgroundColor: '#F3F4F6' },
+  rescuerAvatar: { width: '100%', height: '100%', borderRadius: 22, backgroundColor: '#F3F4F6' },
   medalBadge: {
     position: 'absolute',
     bottom: -4,
@@ -2134,7 +1977,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#3B82F6',
     width: 20,
     height: 20,
-    borderRadius: 10,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1.5,
@@ -2147,10 +1990,10 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    borderRadius: 12,
+    borderRadius: 22,
     paddingVertical: 12,
     paddingHorizontal: 16,
-    marginBottom: 12,
+    marginBottom: 24,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -2190,7 +2033,7 @@ const styles = StyleSheet.create({
   homeStampDot: {
     width: 16,
     height: 16,
-    borderRadius: 8,
+    borderRadius: 22,
     backgroundColor: '#F9FAFB',
     borderWidth: 1,
     borderColor: '#E5E7EB',
@@ -2206,7 +2049,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     paddingVertical: 16,
     paddingHorizontal: 16,
-    borderRadius: 12,
+    borderRadius: 22,
     marginBottom: 24,
     flexDirection: 'column',
     alignItems: 'stretch',
@@ -2223,7 +2066,7 @@ const styles = StyleSheet.create({
   },
   premiumLogoRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   premiumLogoText: { color: '#1F2937', fontSize: 18, fontWeight: '900', letterSpacing: -0.5 },
-  premiumPlusBadge: { backgroundColor: '#FFD700', paddingHorizontal: 4, borderRadius: 12 },
+  premiumPlusBadge: { backgroundColor: '#FFD700', paddingHorizontal: 4, borderRadius: 22 },
   premiumPlusText: { color: '#000', fontSize: 14, fontWeight: '900' },
   premiumBenefitsList: {
     gap: 6,
@@ -2246,7 +2089,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingHorizontal: 12,
     height: 36,
-    borderRadius: 10,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     minWidth: 100,
@@ -2261,8 +2104,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     paddingVertical: 12,
     paddingHorizontal: 16,
-    borderRadius: 12,
-    marginBottom: 12,
+    borderRadius: 22,
+    marginBottom: 24,
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -2279,7 +2122,7 @@ const styles = StyleSheet.create({
   aiLeftContent: { flexDirection: 'row', alignItems: 'center', gap: 12, flex: 1, overflow: 'hidden' },
   aiLogoRow: { flexDirection: 'row', alignItems: 'center', gap: 6 },
   aiTitle: { color: '#1F2937', fontSize: 13.5, fontWeight: '800', letterSpacing: -0.5 },
-  aiBetaBadge: { backgroundColor: '#111827', paddingHorizontal: 5, paddingVertical: 1.5, borderRadius: 8 },
+  aiBetaBadge: { backgroundColor: '#111827', paddingHorizontal: 5, paddingVertical: 1.5, borderRadius: 22 },
   aiBetaText: { color: '#FFFFFF', fontSize: 8, fontWeight: '900', letterSpacing: 0.2 },
   aiSubtitle: { color: '#4B5563', fontSize: 12.5, fontWeight: '600', flexShrink: 1 },
   aiCTAButton: {
@@ -2289,7 +2132,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#111827',
     paddingHorizontal: 14,
     height: 36,
-    borderRadius: 10,
+    borderRadius: 22,
     shadowColor: '#000000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.15,
@@ -2302,13 +2145,13 @@ const styles = StyleSheet.create({
     fontWeight: '800'
   },
 
-  brandLogoCard: { width: 100, height: 60, backgroundColor: '#F9FAFB', borderRadius: 12, alignItems: 'center', justifyContent: 'center', padding: 12 },
+  brandLogoCard: { width: 100, height: 60, backgroundColor: '#F9FAFB', borderRadius: 22, alignItems: 'center', justifyContent: 'center', padding: 12 },
   brandLogo: { width: '100%', height: '100%' },
 
   tipCard: {
     width: 220,
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     overflow: 'hidden',
@@ -2329,12 +2172,12 @@ const styles = StyleSheet.create({
   tipTime: { fontSize: 11, fontWeight: '500', color: '#9CA3AF' },
 
   recentItem: { width: 140, gap: 8 },
-  recentImage: { width: 140, height: 140, borderRadius: 12, backgroundColor: '#F3F4F6' },
-  recentLine: { height: 8, backgroundColor: '#F3F4F6', borderRadius: 4, width: '90%' },
+  recentImage: { width: 140, height: 140, borderRadius: 22, backgroundColor: '#F3F4F6' },
+  recentLine: { height: 8, backgroundColor: '#F3F4F6', borderRadius: 22, width: '90%' },
 
   newStoreItem: { width: 120, gap: 6 },
-  newStoreImage: { width: 120, height: 120, borderRadius: 12, backgroundColor: '#F3F4F6' },
-  newStoreBadge: { position: 'absolute', top: 0, right: 0, backgroundColor: '#10B981', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 12 },
+  newStoreImage: { width: 120, height: 120, borderRadius: 22, backgroundColor: '#F3F4F6' },
+  newStoreBadge: { position: 'absolute', top: 0, right: 0, backgroundColor: '#10B981', paddingHorizontal: 8, paddingVertical: 4, borderRadius: 22 },
   newStoreBadgeText: { color: '#FFF', fontSize: 10, fontWeight: '800' },
   newStoreName: { fontSize: 14, fontWeight: '700', color: '#1A1A1A', textAlign: 'center', marginTop: 4 },
   newStoreCat: { fontSize: 12, color: '#6B7280', textAlign: 'center' },
@@ -2374,7 +2217,7 @@ const styles = StyleSheet.create({
   lookbookTabButton: {
     paddingHorizontal: 14,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 22,
     backgroundColor: '#F3F4F6',
     borderWidth: 1,
     borderColor: '#E5E7EB',
@@ -2395,8 +2238,8 @@ const styles = StyleSheet.create({
   lookbookCanvasCard: {
     marginHorizontal: 20,
     marginTop: 14,
-    marginBottom: 20,
-    borderRadius: 24,
+    marginBottom: 24,
+    borderRadius: 22,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E5E7EB',
@@ -2428,13 +2271,13 @@ const styles = StyleSheet.create({
     position: 'absolute',
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: 22,
     backgroundColor: '#A855F7',
   },
   hotspotDot: {
     width: 24,
     height: 24,
-    borderRadius: 12,
+    borderRadius: 22,
     backgroundColor: '#A855F7',
     borderWidth: 2,
     borderColor: '#FFFFFF',
@@ -2456,7 +2299,7 @@ const styles = StyleSheet.create({
     left: -90,
     width: 212,
     padding: 12,
-    borderRadius: 18,
+    borderRadius: 22,
     backgroundColor: 'rgba(255, 255, 255, 0.95)',
     borderWidth: 1,
     borderColor: 'rgba(255, 255, 255, 0.6)',
@@ -2502,7 +2345,7 @@ const styles = StyleSheet.create({
   tooltipAddBtn: {
     paddingHorizontal: 10,
     paddingVertical: 6,
-    borderRadius: 10,
+    borderRadius: 22,
     backgroundColor: '#A855F7',
     alignItems: 'center',
     justifyContent: 'center',
@@ -2528,8 +2371,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    borderBottomLeftRadius: 24,
-    borderBottomRightRadius: 24,
+    borderBottomLeftRadius: 22,
+    borderBottomRightRadius: 22,
   },
   comboInfoColumn: {
     flexDirection: 'column',
@@ -2564,7 +2407,7 @@ const styles = StyleSheet.create({
   comboAddButton: {
     paddingHorizontal: 14,
     paddingVertical: 10,
-    borderRadius: 12,
+    borderRadius: 22,
     backgroundColor: '#A855F7',
     alignItems: 'center',
     justifyContent: 'center',

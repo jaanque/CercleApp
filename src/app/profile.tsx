@@ -244,11 +244,37 @@ function ProfileView({ session, onOpenCerclePlus }: { session: Session; onOpenCe
 
         {/* Avatar + name */}
         <View style={styles.userSection}>
-          <View style={styles.avatar}>
-            <Text style={styles.avatarInitials}>{initials}</Text>
-          </View>
+          <Pressable
+            style={({ pressed }) => [styles.avatarContainer, pressed && { transform: [{ scale: 0.97 }] }]}
+            onPress={() => Alert.alert('Foto de Perfil', 'En la versión completa podrás subir tu propio avatar personalizado o conectarte con tus redes sociales.')}
+          >
+            <View style={styles.avatar}>
+              <Text style={styles.avatarInitials}>{initials}</Text>
+            </View>
+            <View style={styles.avatarEditOverlay}>
+              <SymbolView name="camera.fill" size={10} tintColor="#FFFFFF" />
+            </View>
+          </Pressable>
           <Text style={styles.userName} numberOfLines={1}>{displayName}</Text>
           <Text style={styles.userEmail} numberOfLines={1}>{user.email}</Text>
+
+          {/* Sleek, high-satisfaction Savings Badge - Senior UX Touch */}
+          <Pressable
+            style={({ pressed }) => [
+              styles.savingsBadge,
+              pressed && { transform: [{ scale: 0.96 }], opacity: 0.9 }
+            ]}
+            onPress={() => Alert.alert(
+              '¡Ahorro acumulado! 🌟',
+              'Has ahorrado un total de 184,00 € comprando excedentes y liquidaciones en comercios locales. ¡Gracias por apoyar el comercio de proximidad y reducir el desperdicio!',
+              [{ text: '¡Genial!', style: 'default' }]
+            )}
+          >
+            <SymbolView name="sparkles" size={11} tintColor="#6B7280" />
+            <Text style={styles.savingsText}>
+              Llevas ahorrados <Text style={styles.savingsBold}>184 €</Text>
+            </Text>
+          </Pressable>
         </View>
 
         {/* Stamp card widget */}
@@ -263,7 +289,7 @@ function ProfileView({ session, onOpenCerclePlus }: { session: Session; onOpenCe
           <View style={styles.stampSlots}>
             {Array.from({ length: TOTAL_STAMPS }).map((_, i) => (
               <View key={i} style={[styles.stampDot, i < EARNED_STAMPS && styles.stampDotFilled]}>
-                {i < EARNED_STAMPS && <SymbolView name="checkmark" size={8} tintColor="#92650A" />}
+                {i < EARNED_STAMPS && <SymbolView name="checkmark" size={8} tintColor="#D97706" />}
               </View>
             ))}
           </View>
@@ -279,11 +305,13 @@ function ProfileView({ session, onOpenCerclePlus }: { session: Session; onOpenCe
           onPress={onOpenCerclePlus}
         >
           <View style={styles.premiumLeft}>
-            <Text style={styles.premiumBrandText}>Cercle</Text>
-            <View style={styles.premiumPlusBadge}>
-              <Text style={styles.premiumPlusText}>+</Text>
+            <View style={styles.premiumBrandBadgeGroup}>
+              <Text style={styles.premiumBrandText}>Cercle</Text>
+              <View style={styles.premiumPlusBadge}>
+                <Text style={styles.premiumPlusText}>+</Text>
+              </View>
             </View>
-            <Text style={styles.premiumSubText}>· Unirte te ahorra dinero</Text>
+            <Text style={styles.premiumSubText}>Tasa de gestión a 0€ y acceso VIP anticipado.</Text>
           </View>
           <View style={styles.premiumCTA}>
             <Text style={styles.premiumCTAText}>Probar gratis</Text>
@@ -529,40 +557,91 @@ const styles = StyleSheet.create({
   // Profile view
   contentCard: { backgroundColor: '#FFFFFF', paddingHorizontal: 20, paddingTop: 8 },
 
-  userSection: { alignItems: 'center', marginBottom: 24 },
+  userSection: { alignItems: 'center', marginBottom: 20 },
+  avatarContainer: {
+    position: 'relative',
+    marginBottom: 12,
+  },
   avatar: {
-    width: 80, height: 80, borderRadius: 40, backgroundColor: '#1A1A1A',
-    alignItems: 'center', justifyContent: 'center', marginBottom: 12,
+    width: 84, height: 84, borderRadius: 42, backgroundColor: '#111827',
+    alignItems: 'center', justifyContent: 'center',
+    borderWidth: 2, borderColor: '#F3F4F6',
   },
   avatarInitials: { fontSize: 28, fontWeight: '800', color: '#FFFFFF' },
-  userName: { fontSize: 20, fontWeight: '800', color: '#111827', maxWidth: SCREEN_WIDTH - 80 },
-  userEmail: { fontSize: 13, color: '#6B7280', marginTop: 3, maxWidth: SCREEN_WIDTH - 80 },
+  avatarEditOverlay: {
+    position: 'absolute',
+    bottom: 0,
+    right: 0,
+    backgroundColor: '#111827',
+    width: 26,
+    height: 26,
+    borderRadius: 13,
+    borderWidth: 2,
+    borderColor: '#FFFFFF',
+    alignItems: 'center',
+    justifyContent: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.15,
+    shadowRadius: 3,
+    elevation: 3,
+  },
+  userName: { fontSize: 20, fontWeight: '900', color: '#111827', maxWidth: SCREEN_WIDTH - 80, letterSpacing: -0.4 },
+  userEmail: { fontSize: 13, color: '#6B7280', marginTop: 3, maxWidth: SCREEN_WIDTH - 80, fontWeight: '500' },
+
+  // Savings Badge - Senior UX Highlight
+  savingsBadge: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: '#F3F4F6',
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    borderRadius: 20,
+    paddingVertical: 5,
+    paddingHorizontal: 10,
+    marginTop: 8,
+    gap: 5,
+  },
+  savingsText: {
+    fontSize: 11,
+    color: '#4B5563',
+    fontWeight: '600',
+  },
+  savingsBold: {
+    fontWeight: '800',
+    color: '#1F2937',
+  },
 
   // Stamp widget
   stampWidget: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#FEF9EC',
+    backgroundColor: '#FEFBF0',
     borderWidth: 1,
-    borderColor: '#F9C74F',
-    borderRadius: 14,
+    borderColor: '#FDE68A',
+    borderRadius: 16,
     paddingHorizontal: 16,
     paddingVertical: 14,
-    marginBottom: 12,
+    marginBottom: 16,
     gap: 12,
+    shadowColor: '#F59E0B',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.02,
+    shadowRadius: 4,
+    elevation: 1,
   },
   stampWidgetLeft: { flex: 1 },
-  stampWidgetTitle: { fontSize: 13.5, fontWeight: '700', color: '#92650A' },
-  stampWidgetSub: { fontSize: 11.5, fontWeight: '500', color: '#B07A10', marginTop: 2 },
+  stampWidgetTitle: { fontSize: 13.5, fontWeight: '800', color: '#D97706' },
+  stampWidgetSub: { fontSize: 11.5, fontWeight: '500', color: '#B45309', marginTop: 2 },
   stampSlots: { flexDirection: 'row', gap: 5 },
   stampDot: {
     width: 18, height: 18, borderRadius: 9,
-    backgroundColor: '#FFF8DC',
+    backgroundColor: '#FFFFFF',
     borderWidth: 1.5, borderColor: '#E5E7EB',
     alignItems: 'center', justifyContent: 'center',
   },
-  stampDotFilled: { backgroundColor: '#FEF9EC', borderColor: '#F9C74F' },
-  stampFraction: { fontSize: 14, fontWeight: '800', color: '#92650A', marginLeft: 4 },
+  stampDotFilled: { backgroundColor: '#FEF3C7', borderColor: '#FDE68A' },
+  stampFraction: { fontSize: 14, fontWeight: '800', color: '#D97706', marginLeft: 4 },
 
   // Cercle+ banner
   premiumBanner: {
@@ -570,30 +649,36 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     backgroundColor: '#F3F4F6',
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    marginBottom: 24,
+    gap: 12,
+  },
+  premiumLeft: { flex: 1, gap: 4 },
+  premiumBrandBadgeGroup: { flexDirection: 'row', alignItems: 'center', gap: 5 },
+  premiumBrandText: { fontSize: 15, fontWeight: '900', color: '#1F2937', letterSpacing: -0.3 },
+  premiumPlusBadge: { backgroundColor: '#FFD700', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 6 },
+  premiumPlusText: { fontSize: 11, fontWeight: '900', color: '#000' },
+  premiumSubText: { fontSize: 12, fontWeight: '500', color: '#6B7280', lineHeight: 16 },
+  premiumCTA: {
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    paddingHorizontal: 14,
-    paddingVertical: 12,
-    marginBottom: 24,
-    gap: 8,
-  },
-  premiumLeft: { flexDirection: 'row', alignItems: 'center', gap: 5, flex: 1, overflow: 'hidden' },
-  premiumBrandText: { fontSize: 15, fontWeight: '900', color: '#1F2937', letterSpacing: -0.3 },
-  premiumPlusBadge: { backgroundColor: '#FFD700', paddingHorizontal: 4, borderRadius: 6 },
-  premiumPlusText: { fontSize: 12, fontWeight: '900', color: '#000' },
-  premiumSubText: { fontSize: 12.5, fontWeight: '500', color: '#6B7280', flexShrink: 1 },
-  premiumCTA: {
-    backgroundColor: '#FFFFFF',
-    borderRadius: 10,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
     paddingHorizontal: 12,
-    height: 36,
+    height: 38,
     justifyContent: 'center',
     alignItems: 'center',
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.05,
+    shadowRadius: 3,
+    elevation: 1,
   },
-  premiumCTAText: { fontSize: 12.5, fontWeight: '700', color: '#1F2937' },
+  premiumCTAText: { fontSize: 12.5, fontWeight: '800', color: '#1F2937' },
 
   // Section title
   sectionTitle: { marginBottom: 12 },
@@ -601,12 +686,17 @@ const styles = StyleSheet.create({
 
   menuCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 18,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     paddingHorizontal: 16,
     paddingVertical: 4,
-    marginBottom: 16,
+    marginBottom: 20,
+    shadowColor: '#000',
+    shadowOffset: { width: 0, height: 2 },
+    shadowOpacity: 0.01,
+    shadowRadius: 4,
+    elevation: 1,
   },
 
   // Menu

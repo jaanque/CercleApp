@@ -162,7 +162,7 @@ export function ProductDetailsSheet({
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [toastType, setToastType] = useState<'success' | 'info'>('success');
   const toastY = useRef(new Animated.Value(-120)).current;
-  const toastTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const toastTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Fullscreen Viewer State
   const [fullscreenImage, setFullscreenImage] = useState(false);
@@ -706,7 +706,7 @@ export function ProductDetailsSheet({
 const s = StyleSheet.create({
   container: { flex: 1, justifyContent: 'flex-end' },
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0,0,0,0.5)',
   },
   dismissArea: { flex: 1 },
@@ -1180,7 +1180,7 @@ const s = StyleSheet.create({
     alignItems: 'center',
   },
   fullscreenCloseArea: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
   },
   fullscreenImg: {
     width: '90%',

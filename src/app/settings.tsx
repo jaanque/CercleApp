@@ -62,6 +62,7 @@ export default function SettingsScreen() {
 
           <View style={styles.selectorContainer}>
             <View style={styles.deliverySelector}>
+              <SymbolView name="gearshape.fill" size={13} tintColor="#1F2937" />
               <Text style={styles.deliveryText} numberOfLines={1}>
                 Configuración
               </Text>
@@ -210,14 +211,16 @@ const styles = StyleSheet.create({
     marginHorizontal: 8,
   },
   deliverySelector: {
-    paddingHorizontal: 14,
-    paddingVertical: 7,
-    backgroundColor: '#F3F4F6',
-    borderRadius: 14,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
+    backgroundColor: '#F3F4F6',
+    paddingHorizontal: 12,
+    height: 40,
+    borderRadius: 12,
+    gap: 6,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
   },
   deliveryText: {
     fontSize: 13,

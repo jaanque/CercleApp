@@ -662,7 +662,7 @@ const styles = StyleSheet.create({
     color: '#6B7280',
   },
   overlay: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0, 0, 0, 0.92)',
     alignItems: 'center',
     justifyContent: 'center',

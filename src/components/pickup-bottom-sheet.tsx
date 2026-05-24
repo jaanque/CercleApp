@@ -163,7 +163,7 @@ export function PickupBottomSheet({ visible, onClose }: PickupBottomSheetProps) 
 const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: 'flex-end' },
   backdrop: {
-    ...StyleSheet.absoluteFillObject,
+    ...StyleSheet.absoluteFill,
     backgroundColor: 'rgba(0,0,0,0.4)',
   },
   dismissArea: { flex: 1 },
