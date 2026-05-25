@@ -2,20 +2,11 @@ import { Image } from 'expo-image';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { SymbolView } from 'expo-symbols';
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  Animated,
-  Dimensions,
-  LayoutAnimation,
-  Platform,
-  Pressable,
-  ScrollView,
-  StyleSheet,
-  Text,
-  UIManager,
-  View,
-} from 'react-native';
+import { Animated, Dimensions, LayoutAnimation, Platform, Pressable, ScrollView, StyleSheet, Text, UIManager, View } from 'react-native';
 import { SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { cartStore } from '../utils/cartStore';
+import { Colors as COLORS, Spacing as SPACING } from '@/constants/theme';
+
 export const ALL_PRODUCTS = [
   { id: 'p1', name: 'Chaqueta Oversize', price: '29 €', originalPrice: '89 €', image: 'https://images.unsplash.com/photo-1551028719-00167b16eac5?auto=format&fit=crop&w=400&q=80', category: 'Destacados' },
   { id: 'p2', name: 'Zapatillas Blancas', price: '45 €', originalPrice: '120 €', image: 'https://images.unsplash.com/photo-1542291026-7eec264c27ff?auto=format&fit=crop&w=400&q=80', category: 'Destacados' },
@@ -463,23 +454,9 @@ export default function CheckoutScreen() {
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: '#FFFFFF',
-  },
-  header: {
-    height: 48,
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingHorizontal: 20,
-    backgroundColor: '#FFFFFF',
-  },
-  backBtn: {
-    width: 32,
-    height: 32,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
+  container: { flex: 1, backgroundColor: COLORS.light.background },
+  header: { height: 48, flexDirection: 'row', alignItems: 'center', paddingHorizontal: SPACING.four, backgroundColor: COLORS.light.background },
+  backBtn: { width: 32, height: 32, alignItems: 'center', justifyContent: 'center', borderRadius: 22, backgroundColor: COLORS.light.backgroundElement, borderWidth: 1, borderColor: '#E5E7EB' },
   headerSpacer: {
     flex: 1,
   },
@@ -554,10 +531,7 @@ const styles = StyleSheet.create({
     fontWeight: '700',
     color: '#1A1A1A',
   },
-  productRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
+  productRow: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.light.backgroundElement, borderRadius: 22, borderWidth: 1, borderColor: '#E5E7EB', padding: SPACING.three, marginBottom: SPACING.two },
   productImg: {
     width: 58,
     height: 58,
@@ -595,14 +569,7 @@ const styles = StyleSheet.create({
     alignItems: 'baseline',
     gap: 6,
   },
-  qtyTrack: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    backgroundColor: '#F3F4F6',
-    borderRadius: 22,
-    height: 32,
-    paddingHorizontal: 4,
-  },
+  qtyTrack: { flexDirection: 'row', alignItems: 'center', backgroundColor: COLORS.light.backgroundElement, borderRadius: 22, height: 32, paddingHorizontal: SPACING.half },
   qtyActionBtn: {
     width: 26,
     height: 26,
@@ -762,14 +729,7 @@ const styles = StyleSheet.create({
     borderTopWidth: 1,
     borderColor: '#F3F4F6',
   },
-  payBtn: {
-    backgroundColor: '#000000',
-    height: 52,
-    borderRadius: 22,
-    alignItems: 'center',
-    justifyContent: 'center',
-    width: '100%',
-  },
+  payBtn: { backgroundColor: '#111827', height: 52, borderRadius: 22, alignItems: 'center', justifyContent: 'center', width: '100%' },
   payBtnContent: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -803,13 +763,7 @@ const styles = StyleSheet.create({
     height: 2.5,
     backgroundColor: '#FFFFFF',
   },
-  overlay: {
-    ...StyleSheet.absoluteFill,
-    backgroundColor: 'rgba(0, 0, 0, 0.88)',
-    alignItems: 'center',
-    justifyContent: 'center',
-    zIndex: 1000,
-  },
+  overlay: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.5)', alignItems: 'center', justifyContent: 'center', zIndex: 1000 },
   overlayContent: {
     alignItems: 'center',
     gap: 16,

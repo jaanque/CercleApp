@@ -44,8 +44,8 @@ export const homeStyles = StyleSheet.create({
     color: '#1F2937',
   },
   headerButtonActive: {
-    backgroundColor: '#ECFDF5',
-    borderColor: '#10B981',
+    backgroundColor: '#FDF2F4',
+    borderColor: '#5B2333',
   },
   searchBarContainer: {
     paddingHorizontal: 20,
@@ -55,7 +55,7 @@ export const homeStyles = StyleSheet.create({
   searchBarInputWrapper: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#F7F7F7',
     borderRadius: 22,
     paddingHorizontal: 12,
     height: 44,
@@ -69,7 +69,7 @@ export const homeStyles = StyleSheet.create({
     flex: 1,
     fontSize: 14.5,
     fontWeight: '600',
-    color: '#1F2937',
+    color: '#333333',
     padding: 0,
   },
   clearSearchButton: {
@@ -83,30 +83,27 @@ export const homeStyles = StyleSheet.create({
     backgroundColor: '#F9FAFB',
     borderRadius: 22,
     borderWidth: 1,
-    borderColor: '#E5E7EB',
-    borderStyle: 'dashed',
   },
   emptyStateIconBadge: {
-    width: 52,
-    height: 52,
+    width: 48,
+    height: 48,
     borderRadius: 22,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#E5E7EB',
     alignItems: 'center',
     justifyContent: 'center',
-    marginBottom: 12,
+    marginBottom: 16,
   },
   emptyStateTitle: {
-    fontSize: 15,
-    fontWeight: '700',
-    color: '#1F2937',
-    marginBottom: 6,
+    fontSize: 16,
+    fontWeight: '800',
+    color: '#333333',
+    marginBottom: 8,
   },
   emptyStateText: {
-    fontSize: 13,
-    fontWeight: '500',
+    fontSize: 13.5,
     color: '#6B7280',
     textAlign: 'center',
-    lineHeight: 18,
+    lineHeight: 19,
   },
   headerButton: {
     width: 40,
@@ -124,16 +121,16 @@ export const homeStyles = StyleSheet.create({
     alignItems: 'center',
     gap: 6,
     height: 40,
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#FDF2F4',
     borderWidth: 1,
-    borderColor: '#FEF3C7',
+    borderColor: '#FDF2F4',
     borderRadius: 22,
     paddingHorizontal: 12,
   },
   pointsPillText: {
     fontSize: 13,
     fontWeight: '700',
-    color: '#111827',
+    color: '#5B2333',
   },
 
   categoriesWrapper: { marginHorizontal: -20, marginBottom: 24 },
@@ -143,7 +140,7 @@ export const homeStyles = StyleSheet.create({
     width: 62,
     height: 62,
     borderRadius: 22,
-    backgroundColor: '#F3F4F6',
+    backgroundColor: '#F7F7F7',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
@@ -152,36 +149,26 @@ export const homeStyles = StyleSheet.create({
   },
   categorySquareSelected: {
     backgroundColor: '#FFFFFF',
-    borderColor: '#111827',
+    borderColor: '#5B2333',
     borderWidth: 1.5,
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.06,
-    shadowRadius: 4,
-    elevation: 2,
   },
   categoryEmoji: { fontSize: 26 },
   categoryText: { fontSize: 11.5, fontWeight: '600', color: '#6B7280', textAlign: 'center' },
   categoryTextSelected: {
-    color: '#111827',
+    color: '#5B2333',
     fontWeight: '800',
   },
   categoryActiveDot: {
     width: 6,
     height: 4,
     borderRadius: 22,
-    backgroundColor: '#111827',
+    backgroundColor: '#5B2333',
     marginTop: 4,
   },
   categorySquareAI: {
     backgroundColor: '#EEF2FF',
     borderColor: '#6366F1',
     borderWidth: 1.5,
-    shadowColor: '#6366F1',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.15,
-    shadowRadius: 4,
-    elevation: 3,
   },
   categoryTextAI: {
     color: '#4F46E5',
@@ -680,9 +667,9 @@ export const homeStyles = StyleSheet.create({
   rescuerPoints: { fontSize: 11, fontWeight: '500', color: '#9CA3AF', textAlign: 'center' },
 
   homeStampWidget: {
-    backgroundColor: '#FFFFFF',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
+    backgroundColor: '#FDF2F4', // Matches pointsPill signature soft pink wash
+    borderWidth: 1.5,
+    borderColor: '#FCE7EC', // Smooth border
     borderRadius: 22,
     paddingVertical: 12,
     paddingHorizontal: 16,
@@ -690,11 +677,11 @@ export const homeStyles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 2 },
-    shadowOpacity: 0.03,
-    shadowRadius: 6,
-    elevation: 1,
+    shadowColor: '#5B2333', // Subtle pink shadow for high-end glow
+    shadowOffset: { width: 0, height: 4 },
+    shadowOpacity: 0.05,
+    shadowRadius: 10,
+    elevation: 2,
   },
   homeStampLeft: {
     gap: 3,
@@ -706,13 +693,13 @@ export const homeStyles = StyleSheet.create({
   },
   homeStampTitle: {
     fontSize: 13.5,
-    fontWeight: '700',
-    color: '#1F2937',
+    fontWeight: '800', // Stronger, more professional bolding
+    color: '#5B2333', // Matching header text accent
   },
   homeStampSubtitle: {
     fontSize: 11.5,
-    fontWeight: '500',
-    color: '#6B7280',
+    fontWeight: '600',
+    color: 'rgba(91, 35, 51, 0.7)', // Harmonious semi-transparent burgundy
   },
   homeStampRight: {
     flexDirection: 'row',
@@ -721,21 +708,7 @@ export const homeStyles = StyleSheet.create({
   },
   homeStampSlots: {
     flexDirection: 'row',
-    gap: 4,
-  },
-  homeStampDot: {
-    width: 16,
-    height: 16,
-    borderRadius: 22,
-    backgroundColor: '#F9FAFB',
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  homeStampDotFilled: {
-    backgroundColor: '#FEF3C7',
-    borderColor: '#FDE68A',
+    gap: 5,
   },
 
   premiumBanner: {
@@ -760,7 +733,7 @@ export const homeStyles = StyleSheet.create({
   premiumLogoRow: { flexDirection: 'row', alignItems: 'center', gap: 4 },
   premiumLogoText: { color: '#1F2937', fontSize: 18, fontWeight: '900', letterSpacing: -0.5 },
   premiumPlusBadge: { backgroundColor: '#FFD700', paddingHorizontal: 4, borderRadius: 22 },
-  premiumPlusText: { color: '#000', fontSize: 14, fontWeight: '900' },
+  premiumPlusText: { color: '#5B2333', fontSize: 14, fontWeight: '900' },
   premiumBenefitsList: {
     gap: 6,
     marginTop: 2,
@@ -1119,51 +1092,87 @@ export const homeStyles = StyleSheet.create({
   },
   floatingCartContainer: {
     position: 'absolute',
-    bottom: 24,
+    bottom: 20,
     left: 0,
     right: 0,
     alignItems: 'center',
     zIndex: 999,
   },
-  floatingCartPill: {
+  floatingButtonsContainer: {
+    position: 'absolute',
+    bottom: 20,
+    left: 0,
+    right: 0,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 12,
+    zIndex: 999,
+  },
+  floatingSearchPill: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: '#FFFFFF',
-    height: 48,
+    height: 44,
     borderRadius: 22,
     paddingHorizontal: 18,
-    borderWidth: 1,
-    borderColor: '#E5E7EB',
-    alignSelf: 'center',
-    gap: 10,
+    borderWidth: 1.5,
+    borderColor: '#5B2333',
     shadowColor: '#000000',
-    shadowOffset: { width: 0, height: 8 },
-    shadowOpacity: 0.08,
-    shadowRadius: 16,
-    elevation: 4,
+    shadowOffset: { width: 0, height: 12 },
+    shadowOpacity: 0.38,
+    shadowRadius: 24,
+    elevation: 16,
+    gap: 8,
+  },
+  floatingCartPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center', // Center content when auto-sizing
+    backgroundColor: '#FFFFFF',
+    height: 44, // Slightly lower height for maximum compact feel
+    borderRadius: 22,
+    paddingHorizontal: 16,
+    borderWidth: 1.5,
+    borderColor: '#5B2333',
+    gap: 16, // Distinct narrow gap between left and right sections instead of spanning the screen
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 12 }, // Maximum elegant displacement
+    shadowOpacity: 0.38, // Very strong shadow opacity for ultimate prominence
+    shadowRadius: 24, // Wide, deep premium glow
+    elevation: 16, // Maximum elevation for Android
   },
   cartBadgeWrapper: {
-    backgroundColor: '#10B981',
-    width: 24,
-    height: 24,
-    borderRadius: 22,
+    backgroundColor: '#5B2333', // Accent color badge background
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    paddingHorizontal: 4.5,
     alignItems: 'center',
     justifyContent: 'center',
   },
   cartBadgeText: {
-    color: '#FFFFFF',
-    fontSize: 11.5,
+    color: '#FFFFFF', // White text on accent badge
+    fontSize: 10,
     fontWeight: '800',
+    lineHeight: 12,
   },
   floatingCartText: {
-    color: '#1F2937',
-    fontSize: 13.5,
+    color: '#5B2333', // Accent color text for a cohesive look
+    fontSize: 14,
     fontWeight: '800',
+    letterSpacing: -0.2,
   },
   floatingCartPrice: {
-    color: '#111827',
+    color: '#5B2333', // Accent color price
     fontSize: 14.5,
     fontWeight: '800',
+  },
+  floatingCartSeparator: {
+    width: 1,
+    height: 14,
+    backgroundColor: '#E5E7EB',
+    marginHorizontal: 2,
   },
 });

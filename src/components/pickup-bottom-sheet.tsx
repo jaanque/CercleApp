@@ -21,22 +21,22 @@ interface PickupBottomSheetProps {
 const STEPS = [
   {
     icon: 'cart.fill',
-    color: '#10B981',
-    bg: '#ECFDF5',
+    color: '#5B2333',
+    bg: '#FDF2F4',
     title: 'Reserva en la app',
     desc: '100% gratis, sin pagar nada por adelantado. Tu artículo queda apartado durante 24h.',
   },
   {
     icon: 'storefront.fill',
-    color: '#3B82F6',
-    bg: '#EFF6FF',
+    color: '#5B2333',
+    bg: '#FDF2F4',
     title: 'Recógelo en tienda',
     desc: 'Ve a la tienda física, muestra tu código QR y llévate el artículo al momento.',
   },
   {
     icon: 'leaf.fill',
-    color: '#10B981',
-    bg: '#ECFDF5',
+    color: '#5B2333',
+    bg: '#FDF2F4',
     title: 'Sin embalajes ni emisiones',
     desc: 'Eliminamos el transporte de paquetes y todo el plástico de embalaje. Comercio local y sostenible.',
   },
@@ -109,7 +109,7 @@ export function PickupBottomSheet({ visible, onClose }: PickupBottomSheetProps) 
           {/* Header */}
           <View style={styles.headerRow}>
             <View style={styles.headerLeft}>
-              <SymbolView name="storefront.fill" size={16} tintColor="#10B981" />
+              <SymbolView name="storefront.fill" size={16} tintColor="#5B2333" />
               <Text style={styles.headerTitle}>Recogida en tienda</Text>
             </View>
             <Pressable

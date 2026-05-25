@@ -20,8 +20,69 @@ import {
 import { SafeAreaView } from 'react-native-safe-area-context';
 
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
-
 const REWARD = { icon: 'percent', label: 'Descuento especial', desc: 'Consigue tu tarjeta de 5 sellos completa y obtén un descuento automático en tu próxima reserva.' };
+
+function StampCardSkeleton() {
+  const shimmerAnim = React.useRef(new Animated.Value(0.4)).current;
+
+  React.useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(shimmerAnim, {
+          toValue: 0.8,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+        Animated.timing(shimmerAnim, {
+          toValue: 0.4,
+          duration: 800,
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, [shimmerAnim]);
+
+  return (
+    <Animated.View
+      style={[
+        styles.loyaltyCard,
+        {
+          opacity: shimmerAnim,
+          padding: 20,
+          gap: 20,
+          backgroundColor: '#FFFFFF',
+        },
+      ]}
+    >
+      {/* Skeleton Card Header */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' }}>
+        <View style={{ width: 120, height: 16, borderRadius: 8, backgroundColor: '#E5E7EB' }} />
+        <View style={{ width: 48, height: 26, borderRadius: 13, backgroundColor: '#E5E7EB' }} />
+      </View>
+
+      {/* Skeleton Stamps Grid */}
+      <View style={{ flexDirection: 'row', justifyContent: 'space-between', gap: 8 }}>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <View
+            key={i}
+            style={{
+              flex: 1,
+              aspectRatio: 1,
+              borderRadius: 22,
+              backgroundColor: '#E5E7EB',
+            }}
+          />
+        ))}
+      </View>
+
+      {/* Skeleton Progress Bar */}
+      <View style={{ height: 6, width: '100%', borderRadius: 3, backgroundColor: '#E5E7EB' }} />
+
+      {/* Skeleton Footer */}
+      <View style={{ height: 14, width: '70%', alignSelf: 'center', borderRadius: 8, backgroundColor: '#E5E7EB' }} />
+    </Animated.View>
+  );
+}
 
 export default function SellosScreen() {
   const router = useRouter();
@@ -252,15 +313,10 @@ export default function SellosScreen() {
           </View>
 
           {/* Loyalty Card */}
-          <View style={styles.loyaltyCard}>
-            {earnedStamps === null || totalStamps === null ? (
-              <View style={{ paddingVertical: 40, alignItems: 'center', justifyContent: 'center' }}>
-                <ActivityIndicator size="large" color="#111827" />
-                <Text style={{ marginTop: 12, fontSize: 13, fontWeight: '600', color: '#6B7280' }}>
-                  Cargando tu tarjeta de sellos...
-                </Text>
-              </View>
-            ) : (
+          {earnedStamps === null || totalStamps === null ? (
+            <StampCardSkeleton />
+          ) : (
+            <View style={styles.loyaltyCard}>
               <>
                 {/* Card header */}
                 <View style={styles.cardHeader}>
@@ -297,7 +353,7 @@ export default function SellosScreen() {
                             <SymbolView
                               name="checkmark.seal.fill"
                               size={32}
-                              tintColor="#111827"
+                              tintColor="#5B2333"
                             />
                             <Text style={styles.stampNumber}>{i + 1}</Text>
                           </>
@@ -334,7 +390,7 @@ export default function SellosScreen() {
                     ]}
                     onPress={() => { }}
                   >
-                    <SymbolView name="crown.fill" size={16} tintColor="#111827" />
+                    <SymbolView name="crown.fill" size={16} tintColor="#5B2333" />
                     <Text style={styles.claimRewardBtnText}>Reclamar Recompensa</Text>
                   </Pressable>
                 ) : (
@@ -343,8 +399,8 @@ export default function SellosScreen() {
                   </Text>
                 )}
               </>
-            )}
-          </View>
+            </View>
+          )}
 
           {/* Rewards section */}
           <View style={styles.rewardsSection}>
@@ -654,9 +710,9 @@ const styles = StyleSheet.create({
     color: '#374151',
   },
   cardProgressPill: {
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#FDF2F4',
     borderWidth: 1,
-    borderColor: '#FEF3C7',
+    borderColor: '#FDF2F4',
     borderRadius: 22,
     paddingHorizontal: 12,
     paddingVertical: 5,
@@ -664,7 +720,7 @@ const styles = StyleSheet.create({
   cardProgressText: {
     fontSize: 14,
     fontWeight: '800',
-    color: '#111827',
+    color: '#5B2333',
     letterSpacing: -0.3,
   },
 
@@ -688,8 +744,8 @@ const styles = StyleSheet.create({
     gap: 3,
   },
   stampSlotFilled: {
-    backgroundColor: '#FEF3C7',
-    borderColor: '#FEF3C7',
+    backgroundColor: '#FDF2F4',
+    borderColor: '#FDF2F4',
     borderStyle: 'solid',
   },
   stampNumber: {
@@ -714,7 +770,7 @@ const styles = StyleSheet.create({
   },
   progressBarFill: {
     height: '100%',
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#5B2333',
     borderRadius: 22,
   },
   cardFooter: {
@@ -751,11 +807,11 @@ const styles = StyleSheet.create({
     width: 40,
     height: 40,
     borderRadius: 22,
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#FDF2F4',
     alignItems: 'center',
     justifyContent: 'center',
     borderWidth: 1,
-    borderColor: '#FEF3C7',
+    borderColor: '#FDF2F4',
   },
   rewardTextGroup: { flex: 1, gap: 2 },
   rewardLabel: {
@@ -876,8 +932,8 @@ const styles = StyleSheet.create({
     backgroundColor: '#FAF5FF',
   },
   helpCardOrange: {
-    borderColor: '#FEF3C7',
-    backgroundColor: '#FEFBF0',
+    borderColor: '#FDF2F4',
+    backgroundColor: '#FAF5FF',
   },
   helpCardHeader: {
     flexDirection: 'row',
@@ -1183,7 +1239,7 @@ const styles = StyleSheet.create({
   claimRewardBtn: {
     marginHorizontal: 20,
     marginBottom: 24,
-    backgroundColor: '#FEF3C7',
+    backgroundColor: '#FDF2F4',
     height: 48,
     borderRadius: 22,
     flexDirection: 'row',
@@ -1192,7 +1248,7 @@ const styles = StyleSheet.create({
     gap: 8,
   },
   claimRewardBtnText: {
-    color: '#111827',
+    color: '#5B2333',
     fontSize: 14.5,
     fontWeight: '800',
     letterSpacing: -0.2,

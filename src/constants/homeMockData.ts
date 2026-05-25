@@ -3,6 +3,7 @@ export interface Category {
     title: string;
     emoji: string;
     isAI?: boolean;
+    activeColor?: string;
 }
 
 export interface NearbyStore {

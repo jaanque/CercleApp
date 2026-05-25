@@ -267,7 +267,7 @@ const styles = StyleSheet.create({
     borderRadius: 22,
   },
   premiumPlusText: {
-    color: '#00',
+    color: '#5B2333',
     fontSize: 16,
     fontWeight: '900',
   },

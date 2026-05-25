@@ -14,7 +14,7 @@ export function StampWidget({ earnedStamps, totalStamps, onPress }: { earnedStam
                 <>
                     <View style={styles.homeStampLeft}>
                         <View style={styles.homeStampHeaderRow}>
-                            <SymbolView name="checkmark.seal.fill" size={13} tintColor="#111827" />
+                            <SymbolView name="checkmark.seal.fill" size={13} tintColor="#5B2333" />
                             <Text style={styles.homeStampTitle}>Tarjeta de sellos</Text>
                         </View>
                         <Text style={styles.homeStampSubtitle}>{earnedStamps} de {totalStamps} completados</Text>
@@ -22,12 +22,16 @@ export function StampWidget({ earnedStamps, totalStamps, onPress }: { earnedStam
                     <View style={styles.homeStampRight}>
                         <View style={styles.homeStampSlots}>
                             {Array.from({ length: totalStamps }).map((_, i) => (
-                                <View key={i} style={[styles.homeStampDot, i < earnedStamps && styles.homeStampDotFilled]}>
-                                    {i < earnedStamps && <SymbolView name="checkmark" size={6} tintColor="#111827" />}
+                                <View key={i} style={{ width: 20, height: 20, alignItems: 'center', justifyContent: 'center' }}>
+                                    {i < earnedStamps ? (
+                                        <SymbolView name="checkmark.seal.fill" size={20} tintColor="#5B2333" />
+                                    ) : (
+                                        <SymbolView name="seal" size={20} tintColor="rgba(91, 35, 51, 0.24)" />
+                                    )}
                                 </View>
                             ))}
                         </View>
-                        <SymbolView name="chevron.right" size={13} tintColor="#9CA3AF" style={{ marginLeft: 4 }} />
+                        <SymbolView name="chevron.right" size={13} tintColor="#5B2333" style={{ marginLeft: 4, opacity: 0.8 }} />
                     </View>
                 </>
             )}

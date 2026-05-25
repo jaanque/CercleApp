@@ -2,7 +2,7 @@ import { useFocusEffect, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SymbolView } from 'expo-symbols';
 import { useCallback, useState, useRef, useEffect } from 'react';
-import { Animated, LayoutAnimation, Platform, Pressable, RefreshControl, ScrollView, Text, View, NativeSyntheticEvent, NativeScrollEvent, UIManager } from 'react-native';
+import { Animated, LayoutAnimation, Modal, Platform, Pressable, RefreshControl, ScrollView, Text, TextInput, View, NativeSyntheticEvent, NativeScrollEvent, UIManager } from 'react-native';
 
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
@@ -172,6 +172,7 @@ export default function HomeScreen() {
 
   const [isPickupOpen, setIsPickupOpen] = useState(false);
   const [isCerclePlusOpen, setIsCerclePlusOpen] = useState(false);
+  const [isSearchModalVisible, setIsSearchModalVisible] = useState(false);
 
   const { earnedStamps, totalStamps, loadUserStamps } = useStamps();
 
@@ -389,15 +390,13 @@ export default function HomeScreen() {
         onProfilePress={() => router.push('/profile')}
         onPickupPress={() => setIsPickupOpen(true)}
         onStampsPress={() => router.push('/sellos')}
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
         isHeaderShadow={isHeaderShadow}
       />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
-        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#10B981" />}
+        refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#5B2333" colors={['#5B2333']} />}
         onScroll={handleScroll}
         scrollEventThrottle={16}
       >
@@ -460,44 +459,142 @@ export default function HomeScreen() {
       <PickupBottomSheet visible={isPickupOpen} onClose={() => setIsPickupOpen(false)} />
       <CerclePlusBottomSheet visible={isCerclePlusOpen} onClose={() => setIsCerclePlusOpen(false)} />
 
+      {/* Search Modal Overlay */}
+      <Modal
+        visible={isSearchModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setIsSearchModalVisible(false)}
+      >
+        <View style={{ flex: 1, backgroundColor: 'rgba(255, 255, 255, 0.98)', paddingTop: Platform.OS === 'ios' ? 60 : 30, paddingHorizontal: 20 }}>
+          {/* Header of Search Modal */}
+          <View style={{ flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', marginBottom: 20 }}>
+            <Text style={{ fontSize: 20, fontWeight: '800', color: '#1F2937' }}>Buscar</Text>
+            <Pressable 
+              onPress={() => setIsSearchModalVisible(false)} 
+              style={{ width: 32, height: 32, borderRadius: 22, backgroundColor: '#F3F4F6', alignItems: 'center', justifyContent: 'center' }}
+            >
+              <SymbolView name="xmark" size={12} tintColor="#6B7280" />
+            </Pressable>
+          </View>
 
-      {/* Floating Cart Pill at the bottom */}
-      {isCartVisible && (
-        <Animated.View
-          style={[
-            styles.floatingCartContainer,
-            {
+          {/* Search Input */}
+          <View style={styles.searchBarInputWrapper}>
+            <SymbolView name="magnifyingglass" size={15} tintColor="#9CA3AF" style={styles.searchIcon} />
+            <TextInput
+              style={styles.searchInput}
+              placeholder="Buscar marcas, locales o categorías..."
+              placeholderTextColor="#9CA3AF"
+              value={searchQuery}
+              onChangeText={setSearchQuery}
+              autoFocus
+            />
+            {searchQuery.length > 0 && (
+              <Pressable onPress={() => setSearchQuery('')} style={styles.clearSearchButton}>
+                <SymbolView name="xmark.circle.fill" size={16} tintColor="#9CA3AF" />
+              </Pressable>
+            )}
+          </View>
+
+          {/* Results List */}
+          <ScrollView showsVerticalScrollIndicator={false} style={{ marginTop: 20 }} contentContainerStyle={{ paddingBottom: 40 }}>
+            {searchQuery.trim().length === 0 ? (
+              <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 60 }}>
+                <SymbolView name="sparkles" size={24} tintColor="#9CA3AF" />
+                <Text style={{ fontSize: 14, fontWeight: '600', color: '#6B7280', marginTop: 10, textAlign: 'center' }}>
+                  Escribe algo para empezar a buscar en el barrio...
+                </Text>
+              </View>
+            ) : filteredStores.length === 0 ? (
+              <View style={{ alignItems: 'center', justifyContent: 'center', paddingVertical: 60 }}>
+                <SymbolView name="exclamationmark.triangle" size={24} tintColor="#9CA3AF" />
+                <Text style={{ fontSize: 14, fontWeight: '600', color: '#6B7280', marginTop: 10, textAlign: 'center' }}>
+                  No se encontraron resultados
+                </Text>
+              </View>
+            ) : (
+              <View style={{ gap: 16 }}>
+                <Text style={{ fontSize: 13, fontWeight: '700', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 0.5 }}>
+                  Locales y tiendas ({filteredStores.length})
+                </Text>
+                {filteredStores.map((store) => (
+                  <Pressable 
+                    key={store.id} 
+                    onPress={() => { setIsSearchModalVisible(false); }}
+                    style={{ flexDirection: 'row', alignItems: 'center', gap: 12, paddingVertical: 4 }}
+                  >
+                    <View style={{ width: 44, height: 44, borderRadius: 22, backgroundColor: '#F3F4F6', overflow: 'hidden' }}>
+                      <View style={{ flex: 1, backgroundColor: '#5B2333', alignItems: 'center', justifyContent: 'center' }}>
+                        <Text style={{ color: '#FFFFFF', fontWeight: '800', fontSize: 16 }}>{store.name[0]}</Text>
+                      </View>
+                    </View>
+                    <View style={{ flex: 1 }}>
+                      <Text style={{ fontSize: 15, fontWeight: '700', color: '#1F2937' }}>{store.name}</Text>
+                      <Text style={{ fontSize: 12, color: '#6B7280', marginTop: 2 }}>{store.category} · {store.distance}</Text>
+                    </View>
+                    <SymbolView name="chevron.right" size={12} tintColor="#9CA3AF" />
+                  </Pressable>
+                ))}
+              </View>
+            )}
+          </ScrollView>
+        </View>
+      </Modal>
+
+      {/* Floating Buttons Control Row at the Bottom */}
+      <View style={styles.floatingButtonsContainer}>
+        {/* Floating Search Pill */}
+        <Pressable
+          style={({ pressed }) => [
+            styles.floatingSearchPill,
+            pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] }
+          ]}
+          onPress={() => setIsSearchModalVisible(true)}
+        >
+          <SymbolView name="magnifyingglass" size={15} tintColor="#5B2333" />
+          <Text style={styles.floatingCartText}>Buscar</Text>
+        </Pressable>
+
+        {/* Floating Cart Pill */}
+        {isCartVisible && (
+          <Animated.View
+            style={{
               transform: [{ translateY: cartSlideAnim }],
               opacity: cartOpacityAnim
-            }
-          ]}
-        >
-          <Pressable
-            style={({ pressed }) => [
-              styles.floatingCartPill,
-              pressed && { opacity: 0.85, transform: [{ scale: 0.97 }] }
-            ]}
-            onPress={() => router.push('/checkout')}
+            }}
           >
-            {/* Green Badge for Item Count with scale spring bounce animation */}
-            <AnimatedBadge count={totalItems} />
-            
-            {/* Cart summary text */}
-            <Text style={styles.floatingCartText}>Ver carrito</Text>
-            
-            {/* Total Price with bounce animation */}
-            <AnimatedPrice price={totalPrice} />
-
-            {/* Chevron Right indicator for native feel */}
-            <SymbolView 
-              name="chevron.right" 
-              size={13} 
-              tintColor="#1F2937" 
-              style={{ opacity: 0.7 }}
-            />
-          </Pressable>
-        </Animated.View>
-      )}
+            <Pressable
+              style={({ pressed }) => [
+                styles.floatingCartPill,
+                pressed && { opacity: 0.9, transform: [{ scale: 0.96 }] }
+              ]}
+              onPress={() => router.push('/checkout')}
+            >
+              {/* Left: Icon + badge + text */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 14 }}>
+                <View style={{ position: 'relative' }}>
+                  <SymbolView name="cart.fill" size={18} tintColor="#5B2333" style={{ marginRight: 6 }} />
+                  <View style={{ position: 'absolute', right: -6, top: -8 }}>
+                    <AnimatedBadge count={totalItems} />
+                  </View>
+                </View>
+                <Text style={styles.floatingCartText}>Ver carrito</Text>
+              </View>
+              
+              {/* Right: Price + chevron */}
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                <AnimatedPrice price={totalPrice} />
+                <SymbolView 
+                  name="chevron.right" 
+                  size={11} 
+                  tintColor="#5B2333" 
+                  style={{ opacity: 0.8 }}
+                />
+              </View>
+            </Pressable>
+          </Animated.View>
+        )}
+      </View>
 
     </View>
   );

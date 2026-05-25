@@ -661,7 +661,7 @@ const styles = StyleSheet.create({
   premiumBrandBadgeGroup: { flexDirection: 'row', alignItems: 'center', gap: 5 },
   premiumBrandText: { fontSize: 15, fontWeight: '900', color: '#1F2937', letterSpacing: -0.3 },
   premiumPlusBadge: { backgroundColor: '#FFD700', paddingHorizontal: 5, paddingVertical: 1, borderRadius: 22 },
-  premiumPlusText: { fontSize: 11, fontWeight: '900', color: '#000' },
+  premiumPlusText: { fontSize: 11, fontWeight: '900', color: '#5B2333' },
   premiumSubText: { fontSize: 12, fontWeight: '500', color: '#6B7280', lineHeight: 16 },
   premiumCTA: {
     backgroundColor: '#FFFFFF',

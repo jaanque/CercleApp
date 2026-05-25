@@ -21,7 +21,7 @@ export function useHomeData() {
             const { data, error } = await supabase.from('categories').select('*').order('order_index', { ascending: true });
             if (!error && data) {
                 const dbCategories = data.map((cat: any) => ({
-                    id: String(cat.id), title: cat.title, emoji: cat.emoji, isAI: cat.is_ai,
+                    id: String(cat.id), title: cat.title, emoji: cat.emoji, isAI: cat.is_ai, activeColor: cat.active_color,
                 }));
                 setCategories([{ id: 'todos', title: 'Todos', emoji: '🛍️' }, ...dbCategories]);
             }
@@ -121,19 +121,20 @@ export function useHomeData() {
         });
 
         return mappedStores.filter((store: MappedStore) => {
+            const categoryStr = store.category || '';
             if (searchQuery.trim().length > 0) {
                 const query = searchQuery.toLowerCase();
-                return store.name.toLowerCase().includes(query) ||
-                    store.category.toLowerCase().includes(query) ||
+                return (store.name || '').toLowerCase().includes(query) ||
+                    categoryStr.toLowerCase().includes(query) ||
                     (store.tagline || '').toLowerCase().includes(query);
             }
             const activeCat = categories.find(c => c.id === selectedCategory);
             if (activeCat && activeCat.title !== 'Todos') {
-                if (activeCat.title === 'Moda') return store.category === 'Ropa & Accesorios';
-                if (activeCat.title === 'Tech') return store.category === 'Electrónica';
-                if (activeCat.title === 'Hogar') return store.category === 'Decoración';
-                if (activeCat.title === 'Deportes') return store.category === 'Deportes';
-                return store.category.toLowerCase().includes(activeCat.title.toLowerCase());
+                if (activeCat.title === 'Moda') return categoryStr === 'Ropa & Accesorios';
+                if (activeCat.title === 'Tech') return categoryStr === 'Electrónica';
+                if (activeCat.title === 'Hogar') return categoryStr === 'Decoración';
+                if (activeCat.title === 'Deportes') return categoryStr === 'Deportes';
+                return categoryStr.toLowerCase().includes(activeCat.title.toLowerCase());
             }
             return true;
         }).sort((a: MappedStore, b: MappedStore) => a.distanceVal - b.distanceVal);
