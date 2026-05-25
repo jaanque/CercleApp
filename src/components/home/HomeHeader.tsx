@@ -12,9 +12,10 @@ interface Props {
     totalStamps: number | null;
     searchQuery: string;
     setSearchQuery: (q: string) => void;
+    isHeaderShadow: boolean;
 }
 
-export function HomeHeader({ onProfilePress, onPickupPress, onStampsPress, earnedStamps, totalStamps, searchQuery, setSearchQuery }: Props) {
+export function HomeHeader({ onProfilePress, onPickupPress, onStampsPress, earnedStamps, totalStamps, searchQuery, setSearchQuery, isHeaderShadow }: Props) {
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
     const searchAnim = useRef(new Animated.Value(0)).current;
     const searchInputRef = useRef<TextInput>(null);
@@ -35,8 +36,9 @@ export function HomeHeader({ onProfilePress, onPickupPress, onStampsPress, earne
     }, [isSearchExpanded, searchAnim, setSearchQuery]);
 
     return (
-        <View style={styles.headerContainer}>
-            <SafeAreaView edges={['top']} />
+        <View style={[styles.headerContainer, isHeaderShadow && { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.2, shadowRadius: 4, elevation: 3 }]}>
+
+            <SafeAreaView edges={['top']} style={{ backgroundColor: 'transparent' }} />
             <View style={styles.topRow}>
                 <Pressable style={({ pressed }) => [styles.headerButton, pressed && { opacity: 0.7 }]} onPress={onProfilePress}>
                     <SymbolView name="person" size={20} tintColor="#1A1A1A" />

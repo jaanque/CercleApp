@@ -10,7 +10,7 @@ export { SCREEN_WIDTH, SCREEN_HEIGHT };
 
 export const homeStyles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#FFFFFF' },
-  contentCard: { backgroundColor: '#FFFFFF', borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingHorizontal: 20, paddingTop: 0, minHeight: SCREEN_HEIGHT },
+  contentCard: { backgroundColor: 'transparent', borderTopLeftRadius: 22, borderTopRightRadius: 22, paddingHorizontal: 20, paddingTop: 0, minHeight: SCREEN_HEIGHT },
 
   headerContainer: {
     backgroundColor: '#FFFFFF',
@@ -50,7 +50,7 @@ export const homeStyles = StyleSheet.create({
   searchBarContainer: {
     paddingHorizontal: 20,
     paddingBottom: 16,
-    backgroundColor: '#FFFFFF',
+    backgroundColor: 'transparent',
   },
   searchBarInputWrapper: {
     flexDirection: 'row',
@@ -1116,5 +1116,54 @@ export const homeStyles = StyleSheet.create({
   },
   comboAddButtonTextActive: {
     color: '#FFFFFF',
+  },
+  floatingCartContainer: {
+    position: 'absolute',
+    bottom: 24,
+    left: 0,
+    right: 0,
+    alignItems: 'center',
+    zIndex: 999,
+  },
+  floatingCartPill: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'center',
+    backgroundColor: '#FFFFFF',
+    height: 48,
+    borderRadius: 22,
+    paddingHorizontal: 18,
+    borderWidth: 1,
+    borderColor: '#E5E7EB',
+    alignSelf: 'center',
+    gap: 10,
+    shadowColor: '#000000',
+    shadowOffset: { width: 0, height: 8 },
+    shadowOpacity: 0.08,
+    shadowRadius: 16,
+    elevation: 4,
+  },
+  cartBadgeWrapper: {
+    backgroundColor: '#10B981',
+    width: 24,
+    height: 24,
+    borderRadius: 22,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  cartBadgeText: {
+    color: '#FFFFFF',
+    fontSize: 11.5,
+    fontWeight: '800',
+  },
+  floatingCartText: {
+    color: '#1F2937',
+    fontSize: 13.5,
+    fontWeight: '800',
+  },
+  floatingCartPrice: {
+    color: '#111827',
+    fontSize: 14.5,
+    fontWeight: '800',
   },
 });

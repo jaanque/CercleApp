@@ -170,10 +170,10 @@ const styles = StyleSheet.create({
 
   sheet: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
     paddingTop: 12,
-    paddingHorizontal: 20,
+    paddingHorizontal: 24,
     paddingBottom: 40,
     shadowColor: '#000',
     shadowOffset: { width: 0, height: -10 },
@@ -185,10 +185,10 @@ const styles = StyleSheet.create({
   dragHandle: {
     width: 38,
     height: 5,
-    borderRadius: 2.5,
+    borderRadius: 22,
     backgroundColor: '#E5E7EB',
     alignSelf: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
 
   headerRow: {
@@ -211,7 +211,7 @@ const styles = StyleSheet.create({
   closeBtn: {
     width: 32,
     height: 32,
-    borderRadius: 10,
+    borderRadius: 22,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
@@ -221,7 +221,7 @@ const styles = StyleSheet.create({
 
   taglineBox: {
     backgroundColor: '#F9FAFB',
-    borderRadius: 12,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     padding: 14,
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   stepIconBox: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: 22,
     alignItems: 'center',
     justifyContent: 'center',
   },
@@ -281,7 +281,7 @@ const styles = StyleSheet.create({
 
   ctaBtn: {
     height: 50,
-    borderRadius: 14,
+    borderRadius: 22,
     backgroundColor: '#1A1A1A',
     alignItems: 'center',
     justifyContent: 'center',

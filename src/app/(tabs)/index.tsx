@@ -1,19 +1,22 @@
 import { useFocusEffect, useRouter } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { SymbolView } from 'expo-symbols';
-import { useCallback, useState } from 'react';
-import { LayoutAnimation, RefreshControl, ScrollView, Text, View } from 'react-native';
+import { useCallback, useState, useRef, useEffect } from 'react';
+import { Animated, LayoutAnimation, Platform, Pressable, RefreshControl, ScrollView, Text, View, NativeSyntheticEvent, NativeScrollEvent, UIManager } from 'react-native';
 
-// Estilos, datos y utilidades locales
-import { FEATURED_PRODUCTS } from '@/constants/homeMockData';
+if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
+  UIManager.setLayoutAnimationEnabledExperimental(true);
+}
+
+// Estilos y utilidades locales
 import { homeStyles as styles } from '@/styles/home';
 import { cartStore } from '@/utils/cartStore';
 import { favoritesStore } from '@/utils/favoritesStore';
+import { supabase } from '@/lib/supabase';
 
-// Modales BottomSheet (estos ya existían en tu proyecto)
+// Modales BottomSheet
 import { CerclePlusBottomSheet } from '@/components/cercle-plus-bottom-sheet';
 import { PickupBottomSheet } from '@/components/pickup-bottom-sheet';
-import { ProductDetailsSheet } from '@/components/product-details-sheet';
 
 // Hooks extraídos
 import { useHomeData } from '@/hooks/useHomeData';
@@ -28,61 +31,352 @@ import { PremiumBanner } from '@/components/home/PremiumBanner';
 import { SectionHeader } from '@/components/home/SectionHeader';
 import { StampWidget } from '@/components/home/StampWidget';
 
+// Componente de Badge animado para el número de items con transición de deslizamiento arriba/abajo
+function AnimatedBadge({ count }: { count: number }) {
+  const [displayCount, setDisplayCount] = useState(count);
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const opacityAnim = useRef(new Animated.Value(1)).current;
+  const scaleAnim = useRef(new Animated.Value(1)).current;
+  const prevCountRef = useRef(count);
+
+  useEffect(() => {
+    const prev = prevCountRef.current;
+    if (count === prev) return;
+
+    const isIncrement = count > prev;
+    prevCountRef.current = count;
+
+    // Paso 1: Deslizar hacia afuera y desvanecer el número anterior
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: isIncrement ? -12 : 12,
+        duration: 40,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 0,
+        duration: 40,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scaleAnim, {
+        toValue: 0.8,
+        duration: 40,
+        useNativeDriver: true,
+      })
+    ]).start(() => {
+      setDisplayCount(count);
+      // Paso 2: Colocar el nuevo número en la posición inicial opuesta
+      slideAnim.setValue(isIncrement ? 12 : -12);
+      opacityAnim.setValue(0);
+      scaleAnim.setValue(0.8);
+
+      // Paso 3: Deslizar con resorte hacia el centro
+      Animated.parallel([
+        Animated.spring(slideAnim, {
+          toValue: 0,
+          useNativeDriver: true,
+          tension: 280,
+          friction: 14,
+        }),
+        Animated.spring(scaleAnim, {
+          toValue: 1,
+          useNativeDriver: true,
+          tension: 280,
+          friction: 14,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 40,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    });
+  }, [count]);
+
+  return (
+    <View style={styles.cartBadgeWrapper}>
+      <Animated.Text
+        style={[
+          styles.cartBadgeText,
+          {
+            opacity: opacityAnim,
+            transform: [
+              { translateY: slideAnim },
+              { scale: scaleAnim }
+            ],
+          },
+        ]}
+      >
+        {displayCount}
+      </Animated.Text>
+    </View>
+  );
+}
+
+// Componente de Precio animado para transiciones más fluidas (subir/bajar dígitos)
+function AnimatedPrice({ price }: { price: number }) {
+  const [displayPrice, setDisplayPrice] = useState(price);
+  const slideAnim = useRef(new Animated.Value(0)).current;
+  const opacityAnim = useRef(new Animated.Value(1)).current;
+  const prevPriceRef = useRef(price);
+
+  useEffect(() => {
+    const prev = prevPriceRef.current;
+    if (price === prev) return;
+
+    const isIncrement = price > prev;
+    prevPriceRef.current = price;
+
+    // Paso 1: Deslizar y desvanecer
+    Animated.parallel([
+      Animated.timing(slideAnim, {
+        toValue: isIncrement ? -16 : 16,
+        duration: 40,
+        useNativeDriver: true,
+      }),
+      Animated.timing(opacityAnim, {
+        toValue: 0,
+        duration: 40,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      setDisplayPrice(price);
+      // Paso 2: Cambiar posición inicial
+      slideAnim.setValue(isIncrement ? 16 : -16);
+
+      // Paso 3: Deslizar hacia el centro
+      Animated.parallel([
+        Animated.timing(slideAnim, {
+          toValue: 0,
+          duration: 50,
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacityAnim, {
+          toValue: 1,
+          duration: 50,
+          useNativeDriver: true,
+        }),
+      ]).start();
+    });
+  }, [price]);
+
+  return (
+    <Animated.View style={{ transform: [{ translateY: slideAnim }], opacity: opacityAnim }}>
+      <Text style={styles.floatingCartPrice}>{displayPrice.toFixed(2).replace('.', ',')} €</Text>
+    </Animated.View>
+  );
+}
+
 export default function HomeScreen() {
   const router = useRouter();
 
   const [isPickupOpen, setIsPickupOpen] = useState(false);
   const [isCerclePlusOpen, setIsCerclePlusOpen] = useState(false);
-  const [isDetailsOpen, setIsDetailsOpen] = useState(false);
-  const [selectedProduct, setSelectedProduct] = useState<any>(null);
 
   const { earnedStamps, totalStamps, loadUserStamps } = useStamps();
+
+  // Extraemos featuredProducts del hook en lugar de importarlo como constante
   const {
-    categories, loadCategories, filteredStores,
+    categories, refreshHomeData, filteredStores, featuredProducts,
     searchQuery, setSearchQuery, selectedCategory, setSelectedCategory
   } = useHomeData();
 
   const [quantities, setQuantities] = useState<Record<string, number>>(() => cartStore.get());
   const [favorites, setFavorites] = useState<Record<string, boolean>>(() => favoritesStore.get());
+  const [isHeaderShadow, setIsHeaderShadow] = useState(false);
   const [refreshing, setRefreshing] = useState(false);
+
+  // Cálculos dinámicos del carrito
+  const totalItems = Object.values(quantities).reduce((a, b) => a + b, 0);
+  const totalPrice = Object.entries(quantities).reduce((sum, [prodId, qty]) => {
+    const prod = featuredProducts.find(p => p.id === prodId);
+    if (!prod) return sum;
+    const priceNum = parseFloat((prod.price ?? '').replace(' €', ''));
+    return sum + priceNum * qty;
+  }, 0);
+
+  // Estados y valores animados para transiciones premium del pill de carrito
+  const initialItemsCount = Object.values(cartStore.get()).reduce((a, b) => a + b, 0);
+  const [isCartVisible, setIsCartVisible] = useState(initialItemsCount > 0);
+  const cartSlideAnim = useRef(new Animated.Value(initialItemsCount > 0 ? 0 : 120)).current;
+  const cartOpacityAnim = useRef(new Animated.Value(initialItemsCount > 0 ? 1 : 0)).current;
+
+  useEffect(() => {
+    if (totalItems > 0) {
+      if (!isCartVisible) {
+        setIsCartVisible(true);
+        Animated.parallel([
+          Animated.spring(cartSlideAnim, {
+            toValue: 0,
+            useNativeDriver: true,
+            tension: 80,
+            friction: 9,
+          }),
+          Animated.timing(cartOpacityAnim, {
+            toValue: 1,
+            duration: 250,
+            useNativeDriver: true,
+          })
+        ]).start();
+      }
+    } else {
+      if (isCartVisible) {
+        Animated.parallel([
+          Animated.timing(cartSlideAnim, {
+            toValue: 120,
+            duration: 250,
+            useNativeDriver: true,
+          }),
+          Animated.timing(cartOpacityAnim, {
+            toValue: 0,
+            duration: 250,
+            useNativeDriver: true,
+          })
+        ]).start(({ finished }) => {
+          if (finished) {
+            setIsCartVisible(false);
+          }
+        });
+      }
+    }
+  }, [totalItems, isCartVisible]);
+
+  // Animar suavemente los cambios de amplitud (ancho) de la cápsula al actualizar precios o cantidades
+  useEffect(() => {
+    LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
+  }, [totalItems, totalPrice]);
+
+  const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    const offsetY = event.nativeEvent.contentOffset.y;
+    setIsHeaderShadow(offsetY > 0);
+  }, []);
+
+  // Sync local quantities with Supabase cart_items
+  const syncCartFromDB = useCallback(async () => {
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      const query = supabase.from('cart_items').select('product_id, quantity');
+      if (user) {
+        query.eq('user_id', user.id);
+      } else {
+        query.eq('guest_id', 'guest');
+      }
+      
+      const { data, error } = await query;
+      if (!error && data) {
+        const dbQty: Record<string, number> = {};
+        data.forEach((item: any) => {
+          if (item.quantity > 0) {
+            dbQty[item.product_id] = item.quantity;
+          }
+        });
+        setQuantities(dbQty);
+        cartStore.set(dbQty);
+      }
+    } catch (err) {
+      console.error('Error syncing cart from DB:', err);
+    }
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
       setQuantities(cartStore.get());
       setFavorites(favoritesStore.get());
       loadUserStamps();
-    }, [loadUserStamps])
+      syncCartFromDB();
+    }, [loadUserStamps, syncCartFromDB])
   );
 
   const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await loadCategories();
+    await refreshHomeData();
     setRefreshing(false);
-  }, [loadCategories]);
+  }, [refreshHomeData]);
 
-  const handleAdd = (id: string) => {
+  const handleAdd = async (id: string) => {
+    const prod = featuredProducts.find(p => p.id === id);
+    const currentQty = quantities[id] || 0;
+    if (prod && currentQty >= prod.stock) {
+      // No permitir seleccionar más artículos que el stock disponible en la pantalla de inicio
+      return;
+    }
+
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    const newQty = { ...quantities, [id]: (quantities[id] || 0) + 1 };
+    const newQtyVal = currentQty + 1;
+    const newQty = { ...quantities, [id]: newQtyVal };
     setQuantities(newQty);
     cartStore.set(newQty);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      await supabase.from('cart_items').upsert({
+        user_id: user ? user.id : null,
+        guest_id: user ? null : 'guest',
+        product_id: id,
+        quantity: newQtyVal,
+        updated_at: new Date().toISOString()
+      }, {
+        onConflict: user ? 'user_id,product_id' : 'guest_id,product_id'
+      });
+    } catch (err) {
+      console.error('Error adding to DB cart:', err);
+    }
   };
 
-  const handleRemove = (id: string) => {
+  const handleRemove = async (id: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     if (!quantities[id]) return;
+    const newQtyVal = quantities[id] - 1;
     let newQty = { ...quantities };
-    if (newQty[id] - 1 <= 0) delete newQty[id];
-    else newQty[id] -= 1;
+    if (newQtyVal <= 0) {
+      delete newQty[id];
+    } else {
+      newQty[id] = newQtyVal;
+    }
     setQuantities(newQty);
     cartStore.set(newQty);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (newQtyVal <= 0) {
+        if (user) {
+          await supabase.from('cart_items').delete().match({ user_id: user.id, product_id: id });
+        } else {
+          await supabase.from('cart_items').delete().match({ guest_id: 'guest', product_id: id });
+        }
+      } else {
+        await supabase.from('cart_items').upsert({
+          user_id: user ? user.id : null,
+          guest_id: user ? null : 'guest',
+          product_id: id,
+          quantity: newQtyVal,
+          updated_at: new Date().toISOString()
+        }, {
+          onConflict: user ? 'user_id,product_id' : 'guest_id,product_id'
+        });
+      }
+    } catch (err) {
+      console.error('Error removing from DB cart:', err);
+    }
   };
 
-  const handleClearSelection = (id: string) => {
+  const handleClearSelection = async (id: string) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     let newQty = { ...quantities };
     delete newQty[id];
     setQuantities(newQty);
     cartStore.set(newQty);
+
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        await supabase.from('cart_items').delete().match({ user_id: user.id, product_id: id });
+      } else {
+        await supabase.from('cart_items').delete().match({ guest_id: 'guest', product_id: id });
+      }
+    } catch (err) {
+      console.error('Error clearing selection in DB cart:', err);
+    }
   };
 
   return (
@@ -97,12 +391,15 @@ export default function HomeScreen() {
         onStampsPress={() => router.push('/sellos')}
         searchQuery={searchQuery}
         setSearchQuery={setSearchQuery}
+        isHeaderShadow={isHeaderShadow}
       />
 
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={{ paddingBottom: 100 }}
         refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#10B981" />}
+        onScroll={handleScroll}
+        scrollEventThrottle={16}
       >
         <View style={styles.contentCard}>
 
@@ -110,37 +407,38 @@ export default function HomeScreen() {
 
           <StampWidget earnedStamps={earnedStamps} totalStamps={totalStamps} onPress={() => router.push('/sellos')} />
 
-          <PremiumBanner onPress={() => setIsCerclePlusOpen(true)} />
-
-          {/* Ofertas (Stock Muerto) */}
+          {/* Ofertas cerca de ti */}
           <SectionHeader title="Ofertas cerca de ti" />
           <View style={styles.flashSectionWrapper}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalSectionContainer}>
-              {FEATURED_PRODUCTS.map((prod) => (
+              {featuredProducts.map((prod) => (
                 <DealProductCard
                   key={prod.id} prod={prod} qty={quantities[prod.id] ?? 0}
-                  onPress={() => { setSelectedProduct(prod); setIsDetailsOpen(true); }}
+                  onPress={() => {}}
                   onAdd={() => handleAdd(prod.id)} onRemove={() => handleRemove(prod.id)} onClear={() => handleClearSelection(prod.id)}
                 />
               ))}
             </ScrollView>
           </View>
 
-          {/* Últimas Unidades */}
+          {/* Últimas unidades */}
           <SectionHeader title="Últimas unidades" />
           <View style={styles.flashSectionWrapper}>
             <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={styles.horizontalSectionContainer}>
-              {FEATURED_PRODUCTS.filter(prod => prod.stockRemaining <= 3).map((prod) => (
+              {featuredProducts.filter(prod => prod.stock < 5 && prod.stock > 0).map((prod) => (
                 <DealProductCard
                   key={prod.id} prod={prod} qty={quantities[prod.id] ?? 0}
-                  onPress={() => { setSelectedProduct(prod); setIsDetailsOpen(true); }}
+                  onPress={() => {}}
                   onAdd={() => handleAdd(prod.id)} onRemove={() => handleRemove(prod.id)} onClear={() => handleClearSelection(prod.id)}
                 />
               ))}
             </ScrollView>
           </View>
 
-          {/* Locales Cercanos */}
+          {/* Banner Premium */}
+          <PremiumBanner onPress={() => setIsCerclePlusOpen(true)} />
+
+          {/* Cerca de ti */}
           <SectionHeader title="Cerca de ti" buttonText="Filtros" />
           <View style={styles.storesList}>
             {filteredStores.length === 0 ? (
@@ -151,7 +449,7 @@ export default function HomeScreen() {
               </View>
             ) : (
               filteredStores.map((store) => (
-                <NearbyStoreCard key={store.id} store={store} onPress={() => router.push({ pathname: '/store', params: { id: store.id } })} />
+                <NearbyStoreCard key={store.id} store={store} onPress={() => {}} />
               ))
             )}
           </View>
@@ -161,16 +459,46 @@ export default function HomeScreen() {
       {/* Bottom Sheets (Modales) */}
       <PickupBottomSheet visible={isPickupOpen} onClose={() => setIsPickupOpen(false)} />
       <CerclePlusBottomSheet visible={isCerclePlusOpen} onClose={() => setIsCerclePlusOpen(false)} />
-      <ProductDetailsSheet
-        visible={isDetailsOpen}
-        onClose={() => { setIsDetailsOpen(false); setSelectedProduct(null); }}
-        product={selectedProduct}
-        quantities={quantities}
-        onAdd={handleAdd}
-        onRemove={handleRemove}
-        isFavorite={selectedProduct ? !!favorites[selectedProduct.id] : false}
-        onToggleFavorite={(id) => { setFavorites({ ...favoritesStore.toggle(id) }); }}
-      />
+
+
+      {/* Floating Cart Pill at the bottom */}
+      {isCartVisible && (
+        <Animated.View
+          style={[
+            styles.floatingCartContainer,
+            {
+              transform: [{ translateY: cartSlideAnim }],
+              opacity: cartOpacityAnim
+            }
+          ]}
+        >
+          <Pressable
+            style={({ pressed }) => [
+              styles.floatingCartPill,
+              pressed && { opacity: 0.85, transform: [{ scale: 0.97 }] }
+            ]}
+            onPress={() => router.push('/checkout')}
+          >
+            {/* Green Badge for Item Count with scale spring bounce animation */}
+            <AnimatedBadge count={totalItems} />
+            
+            {/* Cart summary text */}
+            <Text style={styles.floatingCartText}>Ver carrito</Text>
+            
+            {/* Total Price with bounce animation */}
+            <AnimatedPrice price={totalPrice} />
+
+            {/* Chevron Right indicator for native feel */}
+            <SymbolView 
+              name="chevron.right" 
+              size={13} 
+              tintColor="#1F2937" 
+              style={{ opacity: 0.7 }}
+            />
+          </Pressable>
+        </Animated.View>
+      )}
+
     </View>
   );
 }

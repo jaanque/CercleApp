@@ -139,7 +139,7 @@ const styles = StyleSheet.create({
   closeBtn: {
     width: 32,
     height: 32,
-    borderRadius: 16,
+    borderRadius: 22,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
@@ -157,7 +157,7 @@ const styles = StyleSheet.create({
   // Title block
   titleBlock: {
     alignItems: 'center',
-    marginBottom: 28,
+    marginBottom: 24,
   },
   title: {
     fontSize: 26,
@@ -197,7 +197,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    borderRadius: 16,
+    borderRadius: 22,
     padding: 16,
     gap: 8,
     justifyContent: 'flex-start',
@@ -237,7 +237,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 16,
+    marginBottom: 24,
     paddingVertical: 4,
   },
   paymentLeft: {
@@ -252,7 +252,7 @@ const styles = StyleSheet.create({
   },
   changeBtn: {
     backgroundColor: '#F3F4F6',
-    borderRadius: 20,
+    borderRadius: 22,
     paddingHorizontal: 16,
     paddingVertical: 8,
     borderWidth: 1,
@@ -268,7 +268,7 @@ const styles = StyleSheet.create({
   ctaBtn: {
     width: '100%',
     height: 54,
-    borderRadius: 16,
+    borderRadius: 22,
     backgroundColor: '#1A1A1A',
     justifyContent: 'center',
     alignItems: 'center',

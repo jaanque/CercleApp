@@ -3,7 +3,7 @@ import React from 'react';
 
 export default function AppTabs() {
   return (
-    <Stack screenOptions={{ headerShown: false }}>
+    <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
       <Stack.Screen name="index" />
     </Stack>
   );

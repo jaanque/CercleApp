@@ -121,33 +121,33 @@ const styles = StyleSheet.create({
   backdrop: { ...StyleSheet.absoluteFill, backgroundColor: 'rgba(0,0,0,0.4)' },
   dismissArea: { flex: 1 },
   sheet: {
-    backgroundColor: '#FFFFFF', borderTopLeftRadius: 24, borderTopRightRadius: 24,
+    backgroundColor: '#FFFFFF', borderTopLeftRadius: 22, borderTopRightRadius: 22,
     paddingTop: 12, paddingHorizontal: 20, paddingBottom: 40,
     shadowColor: '#000', shadowOffset: { width: 0, height: -10 }, shadowOpacity: 0.06, shadowRadius: 16, elevation: 20,
   },
   dragHandle: {
     width: 38, height: 5, borderRadius: 2.5, backgroundColor: '#E5E7EB',
-    alignSelf: 'center', marginBottom: 20,
+    alignSelf: 'center', marginBottom: 24,
   },
   storeLabel: {
     flexDirection: 'row', alignItems: 'center', gap: 6,
-    marginBottom: 16, paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
+    marginBottom: 24, paddingBottom: 14, borderBottomWidth: 1, borderBottomColor: '#F3F4F6',
   },
   storeLabelText: { fontSize: 13, fontWeight: '600', color: '#9CA3AF' },
   optionsList: {
-    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 16, overflow: 'hidden', marginBottom: 12,
+    borderWidth: 1, borderColor: '#E5E7EB', borderRadius: 22, overflow: 'hidden', marginBottom: 24,
   },
   optionRow: {
     flexDirection: 'row', alignItems: 'center', paddingVertical: 14, paddingHorizontal: 14, gap: 12,
     backgroundColor: '#FFFFFF',
   },
   optionIconBox: {
-    width: 36, height: 36, borderRadius: 10, alignItems: 'center', justifyContent: 'center',
+    width: 36, height: 36, borderRadius: 22, alignItems: 'center', justifyContent: 'center',
   },
   optionLabel: { flex: 1, fontSize: 14.5, fontWeight: '600' },
   divider: { height: 1, backgroundColor: '#F3F4F6', marginHorizontal: 14 },
   cancelBtn: {
-    height: 50, borderRadius: 14, backgroundColor: '#F3F4F6',
+    height: 50, borderRadius: 22, backgroundColor: '#F3F4F6',
     borderWidth: 1, borderColor: '#E5E7EB', alignItems: 'center', justifyContent: 'center',
   },
   cancelText: { fontSize: 15, fontWeight: '700', color: '#6B7280' },

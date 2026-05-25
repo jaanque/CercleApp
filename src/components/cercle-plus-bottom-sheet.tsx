@@ -203,15 +203,14 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(0,0,0,0.4)',
   },
   dismissArea: { flex: 1 },
-
   sheet: {
     backgroundColor: '#FFFFFF',
-    borderTopLeftRadius: 24,
-    borderTopRightRadius: 24,
+    borderTopLeftRadius: 22,
+    borderTopRightRadius: 22,
     paddingTop: 12,
     paddingHorizontal: 20,
     paddingBottom: 40,
-    shadowColor: '#000',
+    shadowColor: '#00',
     shadowOffset: { width: 0, height: -10 },
     shadowOpacity: 0.06,
     shadowRadius: 16,
@@ -224,7 +223,7 @@ const styles = StyleSheet.create({
     borderRadius: 2.5,
     backgroundColor: '#E5E7EB',
     alignSelf: 'center',
-    marginBottom: 20,
+    marginBottom: 24,
   },
 
   headerRow: {
@@ -265,10 +264,10 @@ const styles = StyleSheet.create({
   premiumPlusBadge: {
     backgroundColor: '#FFD700',
     paddingHorizontal: 5,
-    borderRadius: 8,
+    borderRadius: 22,
   },
   premiumPlusText: {
-    color: '#000',
+    color: '#00',
     fontSize: 16,
     fontWeight: '900',
   },
@@ -290,7 +289,7 @@ const styles = StyleSheet.create({
   closeBtn: {
     width: 28,
     height: 28,
-    borderRadius: 14,
+    borderRadius: 22,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
@@ -305,14 +304,14 @@ const styles = StyleSheet.create({
   cardsContainer: {
     paddingHorizontal: 20,
     gap: 12,
-    marginBottom: 20,
+    marginBottom: 24,
   },
   benefitCard: {
     width: SCREEN_WIDTH * 0.46,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E5E7EB',
-    borderRadius: 16,
+    borderRadius: 22,
     padding: 14,
     gap: 7,
   },
@@ -336,7 +335,7 @@ const styles = StyleSheet.create({
     fontWeight: '400',
     color: '#9CA3AF',
     lineHeight: 16,
-    marginBottom: 20,
+    marginBottom: 24,
   },
   legalLink: {
     fontWeight: '600',
@@ -349,7 +348,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    marginBottom: 14,
+    marginBottom: 24,
   },
   paymentLeft: {
     flexDirection: 'row',
@@ -363,7 +362,7 @@ const styles = StyleSheet.create({
   },
   changeBtn: {
     backgroundColor: '#F3F4F6',
-    borderRadius: 20,
+    borderRadius: 22,
     paddingHorizontal: 14,
     paddingVertical: 7,
     borderWidth: 1,
@@ -379,7 +378,7 @@ const styles = StyleSheet.create({
   ctaBtn: {
     width: '100%',
     height: 52,
-    borderRadius: 16,
+    borderRadius: 22,
     backgroundColor: '#1A1A1A',
     justifyContent: 'center',
     alignItems: 'center',

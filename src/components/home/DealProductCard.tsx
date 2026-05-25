@@ -37,9 +37,12 @@ function AnimatedQuantityNumber({ value, style }: { value: number; style: any })
     return <Animated.Text style={[style, { opacity: opacityAnim, transform: [{ translateY: slideAnim }, { scale: scaleAnim }] }]}>{displayValue}</Animated.Text>;
 }
 
-function ProductQuantityControl({ qty, onAdd, onRemove, onClear, compact }: any) {
+function ProductQuantityControl({ qty, onAdd, onRemove, onClear, compact, stock = 5 }: any) {
     const entranceAnim = useRef(new Animated.Value(qty > 0 ? 1 : 0)).current;
     const isMounted = useRef(qty > 0);
+
+    const isOutOfStock = stock <= 0;
+    const isMaxStockReached = qty >= stock;
 
     useEffect(() => {
         if (qty > 0) {
@@ -56,10 +59,16 @@ function ProductQuantityControl({ qty, onAdd, onRemove, onClear, compact }: any)
     return (
         <View style={[{ height: 34, position: 'relative', justifyContent: 'center' }, compact ? styles.dealActionControl : { marginTop: 5, width: '100%' }, compact && qty > 0 && styles.dealActionControlExpanded]}>
             <Animated.View pointerEvents={qty === 0 ? 'auto' : 'none'} style={[StyleSheet.absoluteFill, { opacity: entranceAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 0] }), transform: [{ scale: entranceAnim.interpolate({ inputRange: [0, 1], outputRange: [1, 0.8] }) }] }]}>
-                <Pressable style={({ pressed }) => [styles.addButton, { marginTop: 0 }, pressed && { transform: [{ scale: 0.95 }], opacity: 0.85 }]} onPress={(e) => { e.stopPropagation(); onAdd(); }}>
-                    <Text style={styles.addButtonText}>Añadir</Text>
-                    <SymbolView name="plus" size={11} tintColor="#1F2937" style={{ marginLeft: 3 }} />
-                </Pressable>
+                {isOutOfStock ? (
+                    <Pressable disabled style={[styles.addButton, { marginTop: 0, opacity: 0.5 }]} onPress={(e) => e.stopPropagation()}>
+                        <Text style={[styles.addButtonText, { color: '#9CA3AF' }]}>Agotado</Text>
+                    </Pressable>
+                ) : (
+                    <Pressable style={({ pressed }) => [styles.addButton, { marginTop: 0 }, pressed && { transform: [{ scale: 0.95 }], opacity: 0.85 }]} onPress={(e) => { e.stopPropagation(); onAdd(); }}>
+                        <Text style={styles.addButtonText}>Añadir</Text>
+                        <SymbolView name="plus" size={11} tintColor="#1F2937" style={{ marginLeft: 3 }} />
+                    </Pressable>
+                )}
             </Animated.View>
             <Animated.View pointerEvents={qty > 0 ? 'auto' : 'none'} style={[styles.qtyRowContainer, StyleSheet.absoluteFill, { marginTop: 0, opacity: entranceAnim, transform: [{ translateX: entranceAnim.interpolate({ inputRange: [0, 1], outputRange: [-15, 0] }) }] }]}>
                 <Animated.View style={[styles.qtySelector, { transform: [{ translateX: entranceAnim.interpolate({ inputRange: [0, 1], outputRange: [-15, 0] }) }] }]}>
@@ -67,8 +76,16 @@ function ProductQuantityControl({ qty, onAdd, onRemove, onClear, compact }: any)
                         <SymbolView name="minus" size={11} tintColor="#1F2937" />
                     </Pressable>
                     <AnimatedQuantityNumber value={qty} style={styles.qtyText} />
-                    <Pressable style={({ pressed }) => [styles.qtyBtn, pressed && { transform: [{ scale: 0.85 }], opacity: 0.7 }]} onPress={(e) => { e.stopPropagation(); onAdd(); }}>
-                        <SymbolView name="plus" size={11} tintColor="#1F2937" />
+                    <Pressable
+                        disabled={isMaxStockReached}
+                        style={({ pressed }) => [
+                            styles.qtyBtn,
+                            isMaxStockReached && { opacity: 0.3 },
+                            !isMaxStockReached && pressed && { transform: [{ scale: 0.85 }], opacity: 0.7 }
+                        ]}
+                        onPress={(e) => { e.stopPropagation(); !isMaxStockReached && onAdd(); }}
+                    >
+                        <SymbolView name="plus" size={11} tintColor={isMaxStockReached ? "#9CA3AF" : "#1F2937"} />
                     </Pressable>
                 </Animated.View>
                 <Animated.View style={{ transform: [{ scale: entranceAnim.interpolate({ inputRange: [0, 1], outputRange: [0.7, 1] }) }] }}>
@@ -82,9 +99,11 @@ function ProductQuantityControl({ qty, onAdd, onRemove, onClear, compact }: any)
 }
 
 export function DealProductCard({ prod, qty, onPress, onAdd, onRemove, onClear }: { prod: FeaturedProduct, qty: number, onPress: () => void, onAdd: () => void, onRemove: () => void, onClear: () => void }) {
-    const savingsVal = parseFloat(prod.originalPrice.replace(' €', '')) - parseFloat(prod.price.replace(' €', ''));
-    const isLowStock = prod.stockRemaining <= 3;
-    const stockLabel = prod.stockRemaining === 1 ? '¡Última unidad disponible!' : isLowStock ? `¡Solo quedan ${prod.stockRemaining} unidades!` : null;
+    const priceNum = parseFloat((prod.price ?? '').replace(' €', ''));
+    const originalPriceNum = prod.originalPrice ? parseFloat(prod.originalPrice.replace(' €', '')) : priceNum;
+    const savingsVal = originalPriceNum - priceNum;
+    const isLowStock = prod.stock < 5;
+    const stockLabel = prod.stock === 1 ? '¡Última unidad disponible!' : isLowStock && prod.stock > 0 ? `¡Solo quedan ${prod.stock} unidades!` : null;
 
     return (
         <Pressable style={({ pressed }) => [styles.dealCard, pressed && { opacity: 0.92 }]} onPress={onPress}>
@@ -97,14 +116,14 @@ export function DealProductCard({ prod, qty, onPress, onAdd, onRemove, onClear }
                     <View style={styles.dealHeaderCopy}>
                         <Text style={styles.dealNameText} numberOfLines={1}>{prod.name}</Text>
                         <View style={styles.dealMetaLine}>
-                            <Text style={styles.dealStoreText} numberOfLines={1}>{prod.store}</Text>
-                            <Text style={styles.dealMetaDot}>·</Text>
-                            <SymbolView name="star.fill" size={9} tintColor="#F59E0B" style={styles.dealMetaIcon} />
+                            <SymbolView name="star.fill" size={11} tintColor="#F59E0B" style={styles.dealMetaIcon} />
                             <Text style={styles.dealRatingVal}>{prod.rating}</Text>
                             <Text style={styles.dealReviewsText}>{prod.reviewsCount}</Text>
+                            <Text style={styles.dealMetaDot}>·</Text>
+                            <Text style={styles.dealStoreText} numberOfLines={1}>{prod.store}</Text>
                         </View>
                     </View>
-                    <ProductQuantityControl compact qty={qty} onAdd={onAdd} onRemove={onRemove} onClear={onClear} />
+                    <ProductQuantityControl compact qty={qty} onAdd={onAdd} onRemove={onRemove} onClear={onClear} stock={prod.stock} />
                 </View>
                 <View style={styles.dealPriceRow}>
                     <View style={styles.dealPriceGroup}>

@@ -11,15 +11,12 @@ export default function RootLayout() {
     <ThemeProvider value={colorScheme === 'dark' ? DarkTheme : DefaultTheme}>
       <AnimatedSplashOverlay />
       
-      <Stack screenOptions={{ headerShown: false }}>
+      <Stack screenOptions={{ headerShown: false, contentStyle: { backgroundColor: 'transparent' } }}>
         <Stack.Screen name="(tabs)" />
         <Stack.Screen name="profile" />
         <Stack.Screen name="cercle-plus" />
         <Stack.Screen name="sellos" />
-        <Stack.Screen name="store" />
-        <Stack.Screen name="store-details" />
-        <Stack.Screen name="cart" />
-        <Stack.Screen name="checkout-suggest" />
+        <Stack.Screen name="checkout" />
         <Stack.Screen name="order-success" />
       </Stack>
     </ThemeProvider>

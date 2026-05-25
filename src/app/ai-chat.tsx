@@ -492,7 +492,7 @@ const styles = StyleSheet.create({
   backBtn: {
     width: 36,
     height: 36,
-    borderRadius: 10,
+    borderRadius: 22,
     backgroundColor: '#FFFFFF',
     borderWidth: 1,
     borderColor: '#E5E7EB',
@@ -538,7 +538,7 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 20,
     paddingBottom: 30,
-    gap: 18,
+    gap: 24,
   },
   messageRow: {
     flexDirection: 'row',
@@ -555,7 +555,7 @@ const styles = StyleSheet.create({
   aiAvatar: {
     width: 28,
     height: 28,
-    borderRadius: 9,
+    borderRadius: 22,
     backgroundColor: '#111827',
     alignItems: 'center',
     justifyContent: 'center',
@@ -569,7 +569,7 @@ const styles = StyleSheet.create({
   messageBubble: {
     paddingVertical: 10,
     paddingHorizontal: 14,
-    borderRadius: 16,
+    borderRadius: 22,
     maxWidth: SCREEN_WIDTH * 0.78,
   },
   bubbleUser: {
@@ -603,7 +603,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     backgroundColor: '#F3F4F6',
-    borderRadius: 16,
+    borderRadius: 22,
     borderTopLeftRadius: 4,
     paddingVertical: 10,
     paddingHorizontal: 14,
@@ -630,7 +630,7 @@ const styles = StyleSheet.create({
     borderColor: '#E5E7EB',
     paddingHorizontal: 12,
     paddingVertical: 8,
-    borderRadius: 20,
+    borderRadius: 22,
   },
   suggestionText: {
     fontSize: 12,
@@ -652,7 +652,7 @@ const styles = StyleSheet.create({
     flex: 1,
     height: 42,
     backgroundColor: '#F3F4F6',
-    borderRadius: 21,
+    borderRadius: 22,
     paddingHorizontal: 16,
     fontSize: 13.5,
     fontWeight: '600',
@@ -683,7 +683,7 @@ const styles = StyleSheet.create({
   productCard: {
     width: CARD_WIDTH,
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     overflow: 'hidden',
@@ -732,7 +732,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderColor: '#E5E7EB',
     height: 32,
-    borderRadius: 10,
+    borderRadius: 22,
     marginTop: 6,
   },
   addButtonText: {
@@ -746,7 +746,7 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     backgroundColor: '#F3F4F6',
     height: 32,
-    borderRadius: 10,
+    borderRadius: 22,
     marginTop: 6,
     paddingHorizontal: 4,
   },

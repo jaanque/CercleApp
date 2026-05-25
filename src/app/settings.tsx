@@ -190,14 +190,14 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
-    paddingHorizontal: 16,
+    paddingHorizontal: 24,
     paddingTop: 8,
     paddingBottom: 14,
   },
   headerButton: {
     width: 38,
     height: 38,
-    borderRadius: 12,
+    borderRadius: 22,
     backgroundColor: '#F3F4F6',
     alignItems: 'center',
     justifyContent: 'center',
@@ -217,7 +217,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#F3F4F6',
     paddingHorizontal: 12,
     height: 40,
-    borderRadius: 12,
+    borderRadius: 22,
     gap: 6,
     borderWidth: 1,
     borderColor: '#E5E7EB',
@@ -233,8 +233,8 @@ const styles = StyleSheet.create({
   },
 
   scrollContent: {
-    paddingHorizontal: 20,
-    paddingTop: 20,
+    paddingHorizontal: 24,
+    paddingTop: 24,
     paddingBottom: 60,
   },
   sectionHeading: {
@@ -248,12 +248,12 @@ const styles = StyleSheet.create({
   },
   menuCard: {
     backgroundColor: '#FFFFFF',
-    borderRadius: 16,
+    borderRadius: 22,
     borderWidth: 1,
     borderColor: '#E5E7EB',
     paddingHorizontal: 16,
     paddingVertical: 4,
-    marginBottom: 20,
+    marginBottom: 24,
   },
   menuRow: {
     flexDirection: 'row',
@@ -289,7 +289,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     gap: 4,
-    marginTop: 20,
+    marginTop: 24,
   },
   footnoteText: {
     fontSize: 12,
